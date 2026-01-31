@@ -1,35 +1,51 @@
 import * as React from "react"
 
-interface SliderProps extends React.InputHTMLAttributes<HTMLInputElement> {
+// Corrected interface - DON'T extend InputHTMLAttributes
+interface SliderProps {
   value?: number[];
   onValueChange?: (value: number[]) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  className?: string;
+  disabled?: boolean;
 }
 
 const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
-  ({ className, value = [0, 100], onValueChange, ...props }, ref) => {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = parseInt(e.target.value);
-      if (value.length === 2) {
-        onValueChange?.([value[0], newValue]);
-      } else {
-        onValueChange?.([newValue]);
-      }
+  ({ 
+    value = [0], 
+    onValueChange, 
+    min = 0, 
+    max = 100, 
+    step = 1, 
+    className = "", 
+    disabled = false,
+    ...props 
+  }, ref) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = [parseFloat(event.target.value)];
+      onValueChange?.(newValue);
     };
 
     return (
-      <div className="relative">
-        <input
-          type="range"
-          ref={ref}
-          value={value[1]}
-          onChange={handleChange}
-          className={`h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary ${className || ''}`}
-          {...props}
-        />
-      </div>
-    )
+      <input
+        ref={ref}
+        type="range"
+        value={value[0] || 0}
+        onChange={handleChange}
+        min={min}
+        max={max}
+        step={step}
+        disabled={disabled}
+        className={`w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer ${className} ${
+          disabled ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        {...props}
+      />
+    );
   }
 )
+
 Slider.displayName = "Slider"
 
 export { Slider }
