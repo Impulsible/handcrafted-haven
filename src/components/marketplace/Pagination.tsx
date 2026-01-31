@@ -30,7 +30,7 @@ export default function Pagination({
     if (totalPages > totalBlocks) {
       const startPage = Math.max(2, currentPage - siblingCount);
       const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
-      let pages: (number | 'ellipsis')[] = [1];
+      const pages: (number | 'ellipsis')[] = [1];
 
       // Left ellipsis
       if (startPage > 2) {
