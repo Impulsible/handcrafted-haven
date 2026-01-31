@@ -58,3 +58,28 @@ body {
 .text-shadow-hero {
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
 }
+
+/* Text gradient utility */
+.text-gradient {
+  background: linear-gradient(to right, #8B7355, #E2725B);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Additional category gradients */
+.bg-gradient-pottery {
+  background: linear-gradient(135deg, #8B7355 0%, #E2725B 100%);
+}
+
+.bg-gradient-jewelry {
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+}
+
+.bg-gradient-woodwork {
+  background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%);
+}
+
+.bg-gradient-textiles {
+  background: linear-gradient(135deg, #87A96B 0%, #98FB98 100%);
+}
