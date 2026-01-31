@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+// REMOVE THIS LINE: import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Category {
   id: string;
@@ -352,11 +352,12 @@ export default function CategoryFilter({
           </div>
         </div>
 
-        {/* Artisan Locations */}
+        {/* Artisan Locations - FIXED: Replaced ScrollArea with div */}
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Artisan Location</h4>
-          <ScrollArea className="h-40">
-            <div className="space-y-2 pr-4">
+          {/* Replaced ScrollArea with regular div */}
+          <div className="h-40 overflow-y-auto pr-4">
+            <div className="space-y-2">
               {locations.map((location) => (
                 <div key={location} className="flex items-center">
                   <input
@@ -375,7 +376,7 @@ export default function CategoryFilter({
                 </div>
               ))}
             </div>
-          </ScrollArea>
+          </div>
         </div>
 
         {/* Active Filters Display */}
@@ -438,4 +439,3 @@ export default function CategoryFilter({
     </div>
   );
 }
-
