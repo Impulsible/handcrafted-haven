@@ -1,4 +1,5 @@
-﻿import * as React from "react"
+// src/components/ui/badge.tsx
+import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
@@ -28,7 +29,11 @@ export interface BadgeProps
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div 
+      className={cn(badgeVariants({ variant }), className)} 
+      {...props}
+      suppressHydrationWarning // Add this to prevent hydration errors
+    />
   )
 }
 

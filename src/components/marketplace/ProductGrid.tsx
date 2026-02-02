@@ -2,7 +2,7 @@
 'use client';
 
 import { ShoppingBag, Heart, Eye, Star } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import type { Product } from '@/types/marketplace';
 

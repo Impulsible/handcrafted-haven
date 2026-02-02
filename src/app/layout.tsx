@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Open_Sans, Playfair_Display, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { CartProvider } from "@/contexts/CartContext";
 
 const openSans = Open_Sans({ 
   subsets: ["latin"],
@@ -53,13 +54,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${openSans.variable} ${playfair.variable} ${dancing.variable}`}>
       <body className="min-h-screen bg-background paper-texture">
-        <div className="relative flex min-h-screen flex-col paper-texture">
-          <Header />
-          <main className="flex-1 paper-texture">{children}</main>
-          <Footer />
-        </div>
+        <CartProvider>
+          <div className="relative flex min-h-screen flex-col paper-texture">
+            <Header />
+            <main className="flex-1 paper-texture">{children}</main>
+            <Footer />
+          </div>
+        </CartProvider>
       </body>
     </html>
   );
 }
-

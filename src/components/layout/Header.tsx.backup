@@ -1,5 +1,5 @@
 ﻿"use client";
-import Image from 'next/image'
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -451,7 +451,7 @@ export default function Header() {
                                   <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center overflow-hidden">
                                     {/* Use item.image instead of a placeholder */}
                                     {item.image ? (
-                                      <Image 
+                                      <img 
                                         src={item.image} 
                                         alt={item.name}
                                         className="h-full w-full object-cover rounded-lg"

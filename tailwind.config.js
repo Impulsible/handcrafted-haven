@@ -1,18 +1,15 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+﻿/** @type {import('tailwindcss').Config} */
+import forms from '@tailwindcss/forms';
+
+const config = {
   content: [
-    // Next.js default structure
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    
-    // If using src directory structure
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/layouts/**/*.{js,ts,jsx,tsx,mdx}",
-    
-    // Include any other directories where you use Tailwind
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./utils/**/*.{js,ts,jsx,tsx,mdx}",
     "./styles/**/*.{css,scss}",
@@ -20,58 +17,55 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Enhanced color schema for better contrast
         primary: {
-          DEFAULT: '#7d5f45',     // Darker, richer Earthen Brown
+          DEFAULT: '#7d5f45',
           50: '#f9f7f4',
           100: '#f0ece5',
           200: '#e0d8cb',
           300: '#cdbfac',
           400: '#b8a288',
-          500: '#7d5f45',         // Darker base
+          500: '#7d5f45',
           600: '#6d4f35',
           700: '#5d3f25',
           800: '#4d2f15',
           900: '#3d1f05',
         },
         secondary: {
-          DEFAULT: '#D25D46',     // Richer Terracotta
+          DEFAULT: '#D25D46',
           50: '#fef6f3',
           100: '#fdeae3',
           200: '#fbd5c8',
           300: '#f8b8a2',
           400: '#f39276',
-          500: '#D25D46',         // Richer base
+          500: '#D25D46',
           600: '#c24d36',
           700: '#b23d26',
           800: '#a22d16',
           900: '#921d06',
         },
         accent: {
-          DEFAULT: '#6D8E54',     // Deeper Sage Green
+          DEFAULT: '#6D8E54',
           50: '#f7f9f4',
           100: '#ecf2e6',
           200: '#d9e5cd',
           300: '#bdd3aa',
           400: '#9dbd80',
-          500: '#6D8E54',         // Deeper base
+          500: '#6D8E54',
           600: '#5d7e44',
           700: '#4d6e34',
           800: '#3d5e24',
           900: '#2d4e14',
         },
-        background: '#FDF6E3',    // Cream
-        foreground: '#0A1222',    // Much darker for excellent contrast
+        background: '#FDF6E3',
+        foreground: '#0A1222',
         text: {
-          DEFAULT: '#0A1222',     // Near black for main text
-          muted: '#334155',       // Dark slate for secondary text
-          light: '#4B5563',       // For less important text
+          DEFAULT: '#0A1222',
+          muted: '#334155',
+          light: '#4B5563',
         },
-        success: '#059669',       // Darker Emerald
-        warning: '#D97706',       // Darker Amber
-        error: '#DC2626',         // Darker Red
-        
-        // Semantic colors
+        success: '#059669',
+        warning: '#D97706',
+        error: '#DC2626',
         border: 'rgba(125, 95, 69, 0.3)',
         input: '#ffffff',
         ring: 'rgba(125, 95, 69, 0.4)',
@@ -87,6 +81,7 @@ module.exports = {
         'body': ['"Open Sans"', 'sans-serif'],
         'accent': ['"Dancing Script"', 'cursive'],
         'dancing': ['"Dancing Script"', 'cursive'],
+        'dancing-script': ['"Dancing Script"', 'cursive'],
         'opensans': ['"Open Sans"', 'sans-serif'],
         'playfair': ['"Playfair Display"', 'serif'],
       },
@@ -169,6 +164,8 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/forms'),
+    forms,
   ],
-}
+};
+
+export default config;
