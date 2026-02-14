@@ -1,5 +1,5 @@
 ﻿"use client";
-import Image from 'next/image'
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,20 +10,19 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
-
 
 // Promo messages
 const promoMessages = [
-  { id: 1, text: "🚚 Free Shipping on Orders Over $50", type: "shipping", code: "FREESHIP" },
-  { id: 2, text: "✨ New Artisan Collection Just Dropped", type: "new" },
-  { id: 3, text: "🎨 Artisan Spotlight: Meet Our Featured Creator", type: "spotlight" },
-  { id: 4, text: "🔥 Flash Sale: 24 Hours Only - 30% Off Textiles", type: "sale" },
+  { id: 1, text: "✨ Free Shipping on Orders Over $50", type: "shipping" },
+  { id: 2, text: "🎨 New Artisan Collection Just Dropped", type: "new" },
+  { id: 3, text: "🌟 Artisan Spotlight: Meet Our Featured Creator", type: "spotlight" },
+  { id: 4, text: "⚡ Flash Sale: 24 Hours Only - 30% Off Textiles", type: "sale" },
   { id: 5, text: "🎭 Upcoming Workshop: Pottery Basics This Saturday", type: "event" },
   { id: 6, text: "💝 Valentine's Collection - Limited Edition Pieces", type: "seasonal" },
-  { id: 7, text: "🌿 Sustainable Crafting Month - Eco-friendly Products", type: "sustainable" }
+  { id: 7, text: "🌱 Sustainable Crafting Month - Eco-friendly Products", type: "sustainable" }
 ];
 
 const APP_VERSION = "v2.1.4";
@@ -112,7 +111,7 @@ const mockUser = {
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const { itemCount, items, totalPrice } = useCart();
+  const { items, totalPrice } = useCart();
   
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -121,6 +120,8 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
+
+  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
   // Auto-rotate promo messages
   useEffect(() => {
@@ -206,6 +207,7 @@ export default function Header() {
   const handleLogin = () => {
     toast.success("Welcome back! Redirecting to dashboard...");
     setIsUserMenuOpen(false);
+    router.push('/auth/signin');
   };
 
   const handleLogout = () => {
@@ -215,7 +217,7 @@ export default function Header() {
 
   return (
     <>
-      {/* Promo Animation Bar - Slightly increased */}
+      {/* Promo Animation Bar */}
       <div className="relative bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border-b border-primary/20 overflow-hidden py-1.5">
         <div className="container mx-auto px-3 py-1.5">
           <div className="flex items-center justify-between">
@@ -231,7 +233,7 @@ export default function Header() {
               <div className="text-center overflow-hidden">
                 <div 
                   key={promoMessages[currentPromoIndex].id}
-                  className="inline-flex items-center gap-1.5 animate-slide-in"
+                  className="inline-flex items-center gap-1.5"
                 >
                   <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${getPromoColor(promoMessages[currentPromoIndex].type)}`}>
                     {promoMessages[currentPromoIndex].type.toUpperCase()}
@@ -265,23 +267,23 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main Header - Slightly increased height */}
+      {/* Main Header */}
       <header className="sticky top-0 z-50 w-full border-b border-primary/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex h-16 items-center justify-between">
-            {/* Logo with Slightly Larger Cursive Font */}
+            {/* Logo */}
             <div className="flex items-center">
               <Link href="/" className="flex items-center space-x-2 group">
                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                   <ShoppingBag className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="text-2xl font-bold font-dancing-script text-primary group-hover:text-primary/90 transition-colors tracking-tight whitespace-nowrap">
+                <span className="text-2xl font-bold text-primary group-hover:text-primary/90 transition-colors tracking-tight whitespace-nowrap">
                   Handcrafted Haven
                 </span>
               </Link>
             </div>
 
-            {/* Desktop Navigation with Slightly Larger Text */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-1.5 dropdown-container">
               {navigationItems.map((item) => {
                 const active = isActive(item.href);
@@ -298,24 +300,21 @@ export default function Header() {
                       onMouseEnter={() => setHoveredNav(item.href)}
                       onMouseLeave={() => setHoveredNav(null)}
                     >
-                      {/* Animated Background */}
                       <div className={`
                         absolute inset-0 rounded-lg transition-all duration-300
                         ${active 
-                          ? 'bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 shadow-organic-sm' 
+                          ? 'bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30' 
                           : hoveredNav === item.href 
                             ? 'bg-primary/5' 
                             : ''
                         }
                       `} />
                       
-                      {/* Animated Dot Indicator */}
                       <div className={`
                         absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-primary transition-all duration-300
                         ${active ? 'w-7 opacity-100' : 'opacity-0 group-hover:w-4 group-hover:opacity-70'}
                       `} />
                       
-                      {/* Text - Slightly larger */}
                       <span className={`
                         relative z-10 text-[15px] font-medium transition-all duration-300 whitespace-nowrap
                         ${active 
@@ -326,7 +325,6 @@ export default function Header() {
                         {item.label}
                       </span>
                       
-                      {/* Dropdown Chevron - Slightly larger */}
                       {item.dropdown && (
                         <ChevronDown className={`
                           relative z-10 h-3.5 w-3.5 transition-transform duration-300 ml-0.5
@@ -337,7 +335,7 @@ export default function Header() {
 
                     {/* Dropdown Menu */}
                     {item.dropdown && activeDropdown === item.href && (
-                      <div className="absolute top-full left-0 mt-2 w-64 bg-background border border-primary/20 rounded-xl shadow-organic-lg overflow-hidden animate-fade-in z-50">
+                      <div className="absolute top-full left-0 mt-2 w-64 bg-background border border-primary/20 rounded-xl shadow-lg overflow-hidden z-50">
                         <div className="p-4 border-b border-primary/10 bg-primary/5">
                           <h3 className="font-semibold text-primary">{item.dropdown.label}</h3>
                           <p className="text-sm text-muted-foreground mt-1">Browse all options</p>
@@ -368,9 +366,9 @@ export default function Header() {
               })}
             </nav>
 
-            {/* Action Buttons - Slightly larger */}
+            {/* Action Buttons */}
             <div className="flex items-center space-x-1.5 sm:space-x-2.5 dropdown-container">
-              {/* Search Bar - Slightly larger */}
+              {/* Search Bar */}
               <form onSubmit={handleSearch} className="hidden lg:block">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -384,7 +382,7 @@ export default function Header() {
                 </div>
               </form>
 
-              {/* Wishlist - Slightly larger */}
+              {/* Wishlist */}
               <button 
                 onClick={() => router.push('/wishlist')}
                 className="p-2 hover:bg-accent/10 rounded-full transition-colors hidden sm:inline-flex relative group"
@@ -397,7 +395,7 @@ export default function Header() {
                 )}
               </button>
 
-              {/* Cart with Preview - Slightly larger */}
+              {/* Cart with Preview */}
               <div className="relative">
                 <button 
                   onClick={() => setIsCartPreviewOpen(!isCartPreviewOpen)}
@@ -411,9 +409,9 @@ export default function Header() {
                   )}
                 </button>
 
-                {/* Cart Preview Dropdown - UPDATED WITH IMAGE SUPPORT */}
+                {/* Cart Preview Dropdown */}
                 {isCartPreviewOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-80 sm:w-96 bg-background border border-primary/20 rounded-xl shadow-organic-lg overflow-hidden animate-fade-in z-50">
+                  <div className="absolute top-full right-0 mt-2 w-80 sm:w-96 bg-background border border-primary/20 rounded-xl shadow-lg overflow-hidden z-50">
                     <div className="p-4 border-b border-primary/10 bg-primary/5">
                       <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-primary">Your Shopping Cart</h3>
@@ -443,29 +441,17 @@ export default function Header() {
                         </div>
                       ) : (
                         <>
-                          {/* Cart Items - UPDATED TO SHOW ACTUAL PRODUCT IMAGES */}
+                          {/* Cart Items */}
                           <div className="divide-y divide-primary/10">
                             {items.slice(0, 3).map((item) => (
                               <div key={item.id} className="p-4 hover:bg-primary/5 transition-colors">
                                 <div className="flex items-center gap-3">
-                                  <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center overflow-hidden">
-                                    {/* Use item.image instead of a placeholder */}
-                                    {item.image ? (
-                                      <Image 
-                                        src={item.image} 
-                                        alt={item.name}
-                                        className="h-full w-full object-cover rounded-lg"
-                                      />
-                                    ) : (
-                                      <Package className="h-8 w-8 text-primary" />
-                                    )}
+                                  <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                                    <Package className="h-8 w-8 text-primary" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="font-medium text-foreground truncate">
                                       {item.name}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                      By {item.artisanName}
                                     </p>
                                     <div className="flex items-center justify-between mt-2">
                                       <span className="font-bold text-primary">
@@ -532,7 +518,7 @@ export default function Header() {
                 )}
               </div>
 
-              {/* User Menu - Slightly larger */}
+              {/* User Menu */}
               <div className="relative">
                 <button 
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -551,7 +537,7 @@ export default function Header() {
 
                 {/* User Menu Dropdown */}
                 {isUserMenuOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-64 bg-background border border-primary/20 rounded-xl shadow-organic-lg overflow-hidden animate-fade-in z-50">
+                  <div className="absolute top-full right-0 mt-2 w-64 bg-background border border-primary/20 rounded-xl shadow-lg overflow-hidden z-50">
                     {mockUser.isLoggedIn ? (
                       <>
                         <div className="p-4 border-b border-primary/10 bg-primary/5">
@@ -642,7 +628,7 @@ export default function Header() {
                 )}
               </div>
 
-              {/* Mobile Menu Button - Slightly larger */}
+              {/* Mobile Menu Button */}
               <button 
                 className="md:hidden p-2 hover:bg-primary/10 rounded-lg transition-all duration-300"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -659,7 +645,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Mobile Search Bar - Slightly larger */}
+          {/* Mobile Search Bar */}
           <div className="lg:hidden mt-4 pb-4">
             <form onSubmit={handleSearch}>
               <div className="relative">
@@ -677,18 +663,18 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Mobile Menu - Slightly larger */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 animate-fade-in"
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
             onClick={() => setIsMobileMenuOpen(false)}
           />
           
           {/* Mobile Menu */}
-          <div className="fixed inset-y-0 right-0 w-full max-w-md bg-background z-50 animate-slide-in-horizontal overflow-y-auto">
-            {/* Header - Slightly larger */}
+          <div className="fixed inset-y-0 right-0 w-full max-w-md bg-background z-50 overflow-y-auto">
+            {/* Header */}
             <div className="sticky top-0 bg-background border-b border-primary/10 p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -696,7 +682,7 @@ export default function Header() {
                     <ShoppingBag className="h-6.5 w-6.5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold font-dancing-script text-primary tracking-tight">
+                    <h2 className="text-xl font-bold text-primary tracking-tight">
                       Handcrafted Haven
                     </h2>
                     <div className="flex items-center gap-2 mt-1">
@@ -719,7 +705,7 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Animated Mobile Navigation - Slightly larger */}
+            {/* Mobile Navigation */}
             <div className="p-5">
               <nav className="space-y-1.5">
                 {navigationItems.map((item) => {
@@ -741,31 +727,6 @@ export default function Header() {
                         </div>
                         <ChevronRight className={`h-4 w-4 ${active ? 'text-primary' : 'text-muted-foreground'}`} />
                       </Link>
-                      
-                      {/* Mobile Dropdown Items */}
-                      {item.dropdown && (
-                        <div className="ml-12 space-y-1">
-                          {item.dropdown.items.slice(0, 3).map((dropdownItem) => (
-                            <Link
-                              key={dropdownItem.href}
-                              href={dropdownItem.href}
-                              className="block p-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                              • {dropdownItem.label}
-                            </Link>
-                          ))}
-                          {item.dropdown.items.length > 3 && (
-                            <Link
-                              href={item.href}
-                              className="block p-2 text-sm text-primary font-medium hover:underline"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                              View all →
-                            </Link>
-                          )}
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -776,7 +737,7 @@ export default function Header() {
                 <div className="h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
               </div>
 
-              {/* Quick Stats - Slightly larger */}
+              {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-3.5 mb-7">
                 <div className="text-center p-4 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors">
                   <div className="text-xl font-bold text-primary">{itemCount}</div>
@@ -817,7 +778,7 @@ export default function Header() {
                 </Button>
               </div>
 
-              {/* User Section - Slightly larger */}
+              {/* User Section */}
               <div className="rounded-xl p-5 mb-7 bg-gradient-to-r from-primary/5 to-transparent">
                 {mockUser.isLoggedIn ? (
                   <>
@@ -866,7 +827,7 @@ export default function Header() {
                 )}
               </div>
 
-              {/* Contact Info - Slightly larger */}
+              {/* Contact Info */}
               <div className="space-y-3.5">
                 <h4 className="font-semibold text-foreground text-sm">Contact Information</h4>
                 <div className="space-y-2.5">
@@ -886,10 +847,10 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Footer with App Version - Slightly larger */}
+            {/* Footer with App Version */}
             <div className="sticky bottom-0 bg-background border-t border-primary/10 p-5 mt-7">
               <div className="text-center">
-                <p className="text-xs text-muted-foreground font-dancing-script font-medium mb-1">
+                <p className="text-xs text-muted-foreground font-medium mb-1">
                   Handcrafted Haven {APP_VERSION}
                 </p>
                 <p className="text-[10px] text-muted-foreground/60">

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Sparkles, Shield, Truck, Award, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 
 export default function MarketplaceHero() {

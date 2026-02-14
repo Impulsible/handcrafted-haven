@@ -1,9 +1,9 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Star, MapPin, Award, Users, CheckCircle, Heart, ShoppingCart, Package } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 
@@ -428,7 +428,7 @@ export default function FeaturedArtisans({
         <div className="text-center">
           <Link href={viewAllLink}>
             <Button size="lg" variant="outline" className="px-8">
-              View All 200+ Productions <span className="ml-2">→</span>
+              View All 200+ Productions <span className="ml-2">?</span>
             </Button>
           </Link>
         </div>

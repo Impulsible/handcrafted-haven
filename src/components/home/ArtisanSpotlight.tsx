@@ -1,6 +1,6 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import { Star, MapPin, Users } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 const artisans = [
   {

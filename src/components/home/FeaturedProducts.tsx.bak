@@ -1,4 +1,4 @@
-ï»¿import Image from "next/image";
+import Image from "next/image";
 import { Star, Heart, ShoppingBag, Clock, Shield, Truck, Award, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
@@ -231,7 +231,7 @@ export default function FeaturedProducts() {
                       ))}
                     </div>
                     <span className="ml-2 text-sm font-medium">{product.rating}</span>
-                    <span className="mx-2 text-text/40">â€¢</span>
+                    <span className="mx-2 text-text/40">•</span>
                     <span className="text-sm text-text/60">{product.reviewCount} reviews</span>
                   </div>
                 </div>
@@ -300,7 +300,7 @@ export default function FeaturedProducts() {
             View All 200+ Products
           </Button>
           <p className="mt-4 text-text/60 text-sm">
-            Free shipping on orders over $100 â€¢ 30-day return policy
+            Free shipping on orders over $100 • 30-day return policy
           </p>
         </div>
       </div>

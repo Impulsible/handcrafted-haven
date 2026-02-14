@@ -1,5 +1,5 @@
-﻿import { Send, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Send, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Newsletter() {
   return (

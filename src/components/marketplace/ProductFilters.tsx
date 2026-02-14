@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Filter, X, ChevronDown, ChevronUp, DollarSign, Star, MapPin, Tag } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';

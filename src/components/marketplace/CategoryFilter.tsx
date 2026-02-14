@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Next.js 13+ App Router
 import { ChevronDown, Filter, X, Star, Palette, Scissors, TreePine, Gem, GlassWater, Hammer, ShoppingBag, BookOpen, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface Category {
   id: string;

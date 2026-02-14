@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X, Clock, TrendingUp, Hash, Sparkles, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useDebounce } from '@/hooks/use-debounce';
 
 interface SearchSuggestion {
