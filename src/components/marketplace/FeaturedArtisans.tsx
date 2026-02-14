@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+﻿/* eslint-disable @next/next/no-img-element */
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Star, MapPin, Award, Users, CheckCircle, Heart, ShoppingCart, Package } from 'lucide-react';
@@ -37,64 +37,64 @@ export interface Artisan {
 const artisanProducts = [
   // Products for artisan 1
   {
-    id: 'prod_101',
+    id: 101,
     name: 'Hand-Thrown Ceramic Mug',
     price: 34.99,
     artisanName: 'Sarah Pottery',
-    artisanId: '1', // String type to match CartContext
-    image: '/mug.jpg', // Changed from imageUrl to image
+    artisanId: 1,
+    image: '/mug.jpg',
   },
   {
-    id: 'prod_102',
+    id: 102,
     name: 'Clay Serving Bowl Set',
     price: 89.99,
     artisanName: 'Sarah Pottery',
-    artisanId: '1',
+    artisanId: 1,
     image: '/bowl.jpg',
   },
   
   // Products for artisan 2
   {
-    id: 'prod_201',
+    id: 201,
     name: 'Woven Wool Throw Blanket',
     price: 129.99,
     artisanName: 'Weaver\'s Guild',
-    artisanId: '2',
+    artisanId: 2,
     image: '/blanket.jpg',
   },
   {
-    id: 'prod_202',
+    id: 202,
     name: 'Handwoven Silk Scarf',
     price: 45.99,
     artisanName: 'Weaver\'s Guild',
-    artisanId: '2',
+    artisanId: 2,
     image: '/scarf.jpg',
   },
   
   // Products for artisan 3
   {
-    id: 'prod_301',
+    id: 301,
     name: 'Oak Wood Cutting Board',
     price: 54.99,
     artisanName: 'Woodcraft Studio',
-    artisanId: '3',
+    artisanId: 3,
     image: '/board.jpg',
   },
   
   // Products for artisan 4
   {
-    id: 'prod_401',
+    id: 401,
     name: 'Sterling Silver Pendant',
     price: 78.99,
     artisanName: 'Silver Smith',
-    artisanId: '4',
+    artisanId: 4,
     image: '/pendant.jpg',
   }
 ];
 
 // Get products for a specific artisan
 const getArtisanProducts = (artisanId: number) => {
-  return artisanProducts.filter(product => product.artisanId === artisanId.toString());
+  return artisanProducts.filter(product => product.artisanId === artisanId);
 };
 
 interface FeaturedArtisansProps {
@@ -140,9 +140,9 @@ export default function FeaturedArtisans({
   compact = false,
   showAddToCart = true,
 }: FeaturedArtisansProps) {
-  // Use your cart context
-  const { addToCart, itemCount } = useCart();
-  const [addedProducts, setAddedProducts] = useState<Set<string>>(new Set());
+  // Use your cart context - FIXED: use addItem and totalItems instead of addToCart and itemCount
+  const { addItem, totalItems } = useCart();
+  const [addedProducts, setAddedProducts] = useState<Set<number>>(new Set());
 
   const handleFollow = (e: React.MouseEvent, artisanId: number) => {
     e.preventDefault();
@@ -161,22 +161,21 @@ export default function FeaturedArtisans({
     // Add the first available product that hasn't been added yet
     const productToAdd = products.find(p => !addedProducts.has(p.id)) || products[0];
     
-    // CORRECTED: Send the exact structure that CartContext expects
-    addToCart({
+    // FIXED: Use addItem instead of addToCart with the correct CartItem structure
+    addItem({
       id: productToAdd.id,
       name: productToAdd.name,
       price: productToAdd.price,
-      image: productToAdd.image, // Changed from imageUrl to image
-      artisanId: productToAdd.artisanId, // Already string type
-      artisanName: productToAdd.artisanName,
+      quantity: 1,
+      image: productToAdd.image,
     });
     
     // Mark as added
     setAddedProducts(prev => new Set(prev).add(productToAdd.id));
     
-    // Show success toast
+    // Show success toast - FIXED: use totalItems instead of itemCount
     toast.success(`Added ${productToAdd.name} to cart!`, {
-      description: `Cart now has ${itemCount + 1} item(s)`,
+      description: `Cart now has ${totalItems + 1} item(s)`,
       action: {
         label: 'View Cart',
         onClick: () => window.location.href = '/cart',

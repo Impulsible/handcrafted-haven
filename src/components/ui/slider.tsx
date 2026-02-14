@@ -1,26 +1,63 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react"
-import * as SliderPrimitive from "@radix-ui/react-slider"
 import { cn } from "@/lib/utils"
 
-const Slider = React.forwardRef<
-  React.ElementRef<typeof SliderPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <SliderPrimitive.Root
-    ref={ref as React.ForwardedRef<HTMLDivElement>}
-    className={cn(
-      "relative flex w-full touch-none select-none items-center",
-      className
-    )}
-    {...props as any}
-  >
-    <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
-      <SliderPrimitive.Range className="absolute h-full bg-primary" />
-    </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
-  </SliderPrimitive.Root>
-))
-Slider.displayName = SliderPrimitive.Root.displayName
+export interface SliderProps {
+  min?: number
+  max?: number
+  step?: number
+  value?: number[]
+  onValueChange?: (value: number[]) => void
+  className?: string
+  disabled?: boolean
+}
+
+const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
+  ({ className, min = 0, max = 100, step = 1, value = [50], onValueChange, disabled = false }, ref) => {
+    const [currentValue, setCurrentValue] = React.useState(value[0])
+    const percentage = ((currentValue - min) / (max - min)) * 100
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = parseInt(e.target.value)
+      setCurrentValue(newValue)
+      onValueChange?.([newValue])
+    }
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "relative flex w-full touch-none select-none items-center",
+          disabled && "opacity-50 cursor-not-allowed",
+          className
+        )}
+      >
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={currentValue}
+          onChange={handleChange}
+          disabled={disabled}
+          className="absolute h-2 w-full cursor-pointer opacity-0"
+        />
+        <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+          <div 
+            className="absolute h-full bg-primary transition-all" 
+            style={{ width: percentage + "%" }}
+          />
+        </div>
+        <div 
+          className="absolute h-5 w-5 rounded-full border-2 border-primary bg-background shadow-sm"
+          style={{ 
+            left: "calc(" + percentage + "% - 0.625rem)",
+            pointerEvents: "none"
+          }}
+        />
+      </div>
+    )
+  }
+)
+Slider.displayName = "Slider"
 
 export { Slider }

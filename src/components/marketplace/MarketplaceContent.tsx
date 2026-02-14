@@ -52,167 +52,215 @@ const adaptSortOption = (sortBy: SortOption): FilterState['sortBy'] => {
   return sortMap[sortBy] || 'featured';
 };
 
-// Mock data for initial render
+// Mock data for initial render - with ALL required Product properties
 const mockProducts: Product[] = [
   {
     id: 1,
+    slug: "handwoven-ceramic-vase",
     name: "Handwoven Ceramic Vase",
+    description: "Beautiful handwoven ceramic vase with intricate patterns. Perfect for displaying your favorite flowers or as a standalone decorative piece.",
+    shortDescription: "Handcrafted ceramic vase with unique patterns",
+    artisanId: 101,
     artisanName: "Elena Pottery",
+    artisanSlug: "elena-pottery",
     currentPrice: 89.99,
     originalPrice: 105.99,
     discountPercentage: 15,
     rating: 4.8,
     reviewCount: 124,
     image: "https://images.unsplash.com/photo-1612196808214-b7e239e5dd43?w=500&h=500&fit=crop",
+    galleryImages: [],
     category: "Pottery",
     subcategory: "Vases",
     tags: ["handmade", "ceramic"],
+    materials: ["Clay", "Glaze"],
     stock: 15,
     inStock: true,
-    fastDelivery: true,
     isNew: true,
     isBestSeller: false,
     isFeatured: true,
-    materials: ["Clay", "Glaze"],
     shipping: {
       isFreeShipping: true,
       estimatedDays: 3,
       locations: ["Worldwide"]
-    }
+    },
+    createdAt: "2024-01-15",
+    updatedAt: "2024-01-15"
   },
   {
     id: 2,
+    slug: "solid-oak-cutting-board",
     name: "Solid Oak Cutting Board",
+    description: "Premium solid oak cutting board with elegant design. Perfect for food preparation and serving.",
+    shortDescription: "Handcrafted oak cutting board",
+    artisanId: 102,
     artisanName: "Woodcraft by John",
+    artisanSlug: "woodcraft-by-john",
     currentPrice: 65.50,
     originalPrice: 75.00,
     discountPercentage: 13,
     rating: 4.9,
     reviewCount: 89,
     image: "https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=500&h=500&fit=crop",
+    galleryImages: [],
     category: "Woodwork",
     subcategory: "Kitchen",
     tags: ["handmade", "kitchen", "oak"],
+    materials: ["Oak", "Mineral Oil"],
     stock: 8,
     inStock: true,
-    fastDelivery: true,
     isNew: false,
     isBestSeller: true,
     isFeatured: true,
-    materials: ["Oak", "Mineral Oil"],
     shipping: {
       isFreeShipping: true,
       estimatedDays: 4,
       locations: ["Worldwide"]
-    }
+    },
+    createdAt: "2024-01-10",
+    updatedAt: "2024-01-10"
   },
   {
     id: 3,
+    slug: "silver-leaf-earrings",
     name: "Silver Leaf Earrings",
+    description: "Elegant silver leaf earrings handcrafted with attention to detail. Lightweight and comfortable for daily wear.",
+    shortDescription: "Handmade silver leaf earrings",
+    artisanId: 103,
     artisanName: "Sophia's Jewels",
+    artisanSlug: "sophias-jewels",
     currentPrice: 45.00,
     originalPrice: 50.00,
     discountPercentage: 10,
     rating: 4.7,
     reviewCount: 56,
     image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&h=500&fit=crop",
+    galleryImages: [],
     category: "Jewelry",
     subcategory: "Earrings",
     tags: ["handmade", "silver", "leaf"],
+    materials: ["Silver", "Gemstone"],
     stock: 25,
     inStock: true,
-    fastDelivery: true,
     isNew: true,
     isBestSeller: false,
     isFeatured: true,
-    materials: ["Silver", "Gemstone"],
     shipping: {
       isFreeShipping: false,
       estimatedDays: 5,
       locations: ["Worldwide"]
-    }
+    },
+    createdAt: "2024-01-20",
+    updatedAt: "2024-01-20"
   },
   {
     id: 4,
+    slug: "wool-blend-throw-blanket",
     name: "Wool Blend Throw Blanket",
+    description: "Cozy and warm wool blend throw blanket. Perfect for chilly evenings and adding texture to your home decor.",
+    shortDescription: "Handwoven wool blend blanket",
+    artisanId: 104,
     artisanName: "Cozy Knits",
+    artisanSlug: "cozy-knits",
     currentPrice: 120.00,
+    originalPrice: 150.00,
+    discountPercentage: 20,
     rating: 4.6,
     reviewCount: 42,
     image: "https://images.unsplash.com/photo-1580309137424-8f1f3e20cc2d?w=500&h=500&fit=crop",
+    galleryImages: [],
     category: "Textiles",
     subcategory: "Blankets",
     tags: ["handmade", "wool", "blanket"],
+    materials: ["Wool", "Cotton"],
     stock: 5,
     inStock: true,
-    fastDelivery: false,
     isNew: false,
     isBestSeller: false,
     isFeatured: false,
-    materials: ["Wool", "Cotton"],
     shipping: {
       isFreeShipping: true,
       estimatedDays: 6,
       locations: ["Worldwide"]
-    }
+    },
+    createdAt: "2024-01-05",
+    updatedAt: "2024-01-05"
   },
   {
     id: 5,
+    slug: "stoneware-coffee-mug",
     name: "Stoneware Coffee Mug",
+    description: "Beautiful stoneware coffee mug with comfortable handle. Perfect for your morning coffee or tea.",
+    shortDescription: "Handmade ceramic coffee mug",
+    artisanId: 101,
     artisanName: "Elena Pottery",
+    artisanSlug: "elena-pottery",
     currentPrice: 28.50,
+    originalPrice: 35.00,
+    discountPercentage: 19,
     rating: 4.8,
     reviewCount: 103,
     image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=500&h=500&fit=crop",
+    galleryImages: [],
     category: "Pottery",
     subcategory: "Mugs",
     tags: ["handmade", "ceramic", "mug"],
+    materials: ["Clay", "Glaze"],
     stock: 30,
     inStock: true,
-    fastDelivery: true,
     isNew: false,
     isBestSeller: true,
     isFeatured: false,
-    materials: ["Clay", "Glaze"],
     shipping: {
       isFreeShipping: true,
       estimatedDays: 3,
       locations: ["Worldwide"]
-    }
+    },
+    createdAt: "2024-01-12",
+    updatedAt: "2024-01-12"
   },
   {
     id: 6,
+    slug: "leather-journal",
     name: "Leather Journal",
+    description: "Handcrafted leather journal with premium paper. Perfect for writing, sketching, or as a unique gift.",
+    shortDescription: "Genuine leather journal",
+    artisanId: 105,
     artisanName: "Bound Creations",
+    artisanSlug: "bound-creations",
     currentPrice: 35.00,
+    originalPrice: 45.00,
+    discountPercentage: 22,
     rating: 4.5,
     reviewCount: 28,
     image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&h=500&fit=crop",
+    galleryImages: [],
     category: "Paper Crafts",
     subcategory: "Journals",
     tags: ["handmade", "leather", "journal"],
+    materials: ["Leather", "Paper"],
     stock: 12,
     inStock: true,
-    fastDelivery: true,
     isNew: true,
     isBestSeller: false,
     isFeatured: false,
-    materials: ["Leather", "Paper"],
     shipping: {
       isFreeShipping: false,
       estimatedDays: 4,
       locations: ["Worldwide"]
-    }
+    },
+    createdAt: "2024-01-18",
+    updatedAt: "2024-01-18"
   }
 ];
 
 // Available categories for filters
 const availableCategories = [
-  { id: "pottery", name: "Pottery", count: 48, icon: "🏺" },
-  { id: "woodwork", name: "Woodwork", count: 62, icon: "🪵" },
-  { id: "jewelry", name: "Jewelry", count: 72, icon: "💍" },
-  { id: "textiles", name: "Textiles", count: 45, icon: "🧵" },
-  { id: "paper", name: "Paper Crafts", count: 28, icon: "📜" }
+  { id: "pottery", name: "Pottery", count: 48, icon: "🏺", color: "from-orange-500 to-amber-500", bgColor: "bg-orange-50", textColor: "text-orange-800" },
+  { id: "woodwork", name: "Woodwork", count: 62, icon: "🪵", color: "from-emerald-500 to-green-500", bgColor: "bg-emerald-50", textColor: "text-emerald-800" },
+  { id: "jewelry", name: "Jewelry", count: 72, icon: "💍", color: "from-blue-500 to-indigo-500", bgColor: "bg-blue-50", textColor: "text-blue-800" },
+  { id: "textiles", name: "Textiles", count: 45, icon: "🧵", color: "from-pink-500 to-rose-500", bgColor: "bg-pink-50", textColor: "text-pink-800" },
+  { id: "paper", name: "Paper Crafts", count: 28, icon: "📜", color: "from-yellow-600 to-amber-600", bgColor: "bg-amber-50", textColor: "text-amber-800" }
 ];
 
 const availableMaterials = ["Clay", "Wood", "Metal", "Glass", "Fabric", "Leather", "Stone", "Paper"];
@@ -226,6 +274,9 @@ export default function MarketplaceContent() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   
+  // Store search query separately since it's not in FilterState
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  
   const [filters, setFilters] = useState<FilterState>({
     categories: searchParams.get("category") ? [searchParams.get("category")!] : [],
     priceRange: [0, 500],
@@ -234,10 +285,7 @@ export default function MarketplaceContent() {
     artisanLocations: [],
     sortBy: "featured",
     inStockOnly: false,
-    onSaleOnly: false,
-    search: searchParams.get("q") || "",
-    inStock: false,
-    fastDelivery: false
+    onSaleOnly: false
   });
 
   // Apply filters and sorting
@@ -281,9 +329,9 @@ export default function MarketplaceContent() {
         filtered = filtered.filter(p => (p.discountPercentage || 0) > 0);
       }
 
-      // Apply search filter
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
+      // Apply search filter (using separate searchQuery state)
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
         filtered = filtered.filter(p => 
           p.name.toLowerCase().includes(searchLower) ||
           p.artisanName.toLowerCase().includes(searchLower) ||
@@ -304,7 +352,7 @@ export default function MarketplaceContent() {
           filtered.sort((a, b) => b.rating - a.rating);
           break;
         case "newest":
-          filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+          filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           break;
         case "bestsellers":
           filtered.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
@@ -320,7 +368,7 @@ export default function MarketplaceContent() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [filters, products]);
+  }, [filters, products, searchQuery]);
 
   const handleFilterChange = (newFilters: FilterState) => {
     setIsLoading(true);
@@ -330,6 +378,11 @@ export default function MarketplaceContent() {
   const handleSortChange = (sortBy: SortOption) => {
     setIsLoading(true);
     setFilters(prev => ({ ...prev, sortBy: adaptSortOption(sortBy) }));
+  };
+
+  const handleSearchChange = (query: string) => {
+    setIsLoading(true);
+    setSearchQuery(query);
   };
 
   const handleAddToCart = (product: Product) => {
@@ -357,11 +410,9 @@ export default function MarketplaceContent() {
       artisanLocations: [],
       sortBy: "featured",
       inStockOnly: false,
-      onSaleOnly: false,
-      search: "",
-      inStock: false,
-      fastDelivery: false
+      onSaleOnly: false
     });
+    setSearchQuery("");
   };
 
   return (
@@ -384,6 +435,19 @@ export default function MarketplaceContent() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative max-w-2xl mx-auto">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search products, artisans, or categories..."
+              className="w-full px-6 py-4 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-lg"
+            />
+          </div>
+        </div>
+
         {/* Collection Spotlight */}
         <CollectionSpotlight />
 
@@ -401,7 +465,15 @@ export default function MarketplaceContent() {
               />
 
               {/* Clear All Filters Button */}
-              {Object.values(filters).some(v => v && v !== false && (Array.isArray(v) ? v.length > 0 : true)) && (
+              {(filters.categories.length > 0 || 
+                filters.materials.length > 0 || 
+                filters.artisanLocations.length > 0 || 
+                filters.minRating !== null || 
+                filters.inStockOnly || 
+                filters.onSaleOnly ||
+                filters.priceRange[0] > 0 || 
+                filters.priceRange[1] < 500 ||
+                searchQuery) && (
                 <div className='mt-4 pt-4 border-t border-gray-200'>
                   <Button 
                     variant='outline' 
@@ -424,9 +496,24 @@ export default function MarketplaceContent() {
             >
               <Filter className="h-4 w-4" />
               Filters
-              {Object.values(filters).filter(v => v && v !== false && (Array.isArray(v) ? v.length > 0 : true)).length > 0 && (
+              {(filters.categories.length > 0 || 
+                filters.materials.length > 0 || 
+                filters.artisanLocations.length > 0 || 
+                filters.minRating !== null || 
+                filters.inStockOnly || 
+                filters.onSaleOnly ||
+                filters.priceRange[0] > 0 || 
+                filters.priceRange[1] < 500) && (
                 <Badge variant="secondary" className="ml-2">
-                  {Object.values(filters).filter(v => v && v !== false && (Array.isArray(v) ? v.length > 0 : true)).length}
+                  {[
+                    filters.categories.length,
+                    filters.materials.length,
+                    filters.artisanLocations.length,
+                    filters.minRating ? 1 : 0,
+                    filters.inStockOnly ? 1 : 0,
+                    filters.onSaleOnly ? 1 : 0,
+                    (filters.priceRange[0] > 0 || filters.priceRange[1] < 500) ? 1 : 0
+                  ].reduce((a, b) => a + b, 0)}
                 </Badge>
               )}
             </Button>
@@ -455,6 +542,7 @@ export default function MarketplaceContent() {
             <div className="flex items-center justify-between mb-6">
               <p className="text-sm text-gray-600">
                 Showing <span className="font-semibold">{filteredProducts.length}</span> products
+                {searchQuery && <span> for &quot;{searchQuery}&quot;</span>}
               </p>
               <div className="hidden lg:flex items-center gap-4">
                 <SortDropdown 

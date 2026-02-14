@@ -1,21 +1,8 @@
-﻿// Update the imports in marketplace/page.tsx:
 "use client";
-
 
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-
-// Helper function to safely get date
-const safeDate = (dateString: string | undefined): Date => {
-  return dateString ? new Date(dateString) : new Date();
-};
-
-// Helper function to safely format date
-const safeFormatDate = (dateString: string | undefined): string => {
-  return dateString 
-    ? formatDistanceToNow(new Date(dateString), { addSuffix: true })
-    : 'Recently added';
-};import {
+import {
   CheckCircle,
   Clock,
   Filter,
@@ -107,14 +94,8 @@ const mockProducts: Product[] = Array.from({ length: 44 }, (_, i) => {
     discountPercentage: discount,
     category: category.name,
     subcategory: category.sub,
-    artisanId: (i % 12) + 1,
-    artisanName: [
-      'Elena Rodriguez', 'Kaito Tanaka', 'Sophie Martin', 'Marcus Chen', 
-      'Aisha Patel', 'Carlos Silva', 'Yuki Nakamura', 'Fatima Al-Mansoori',
-      'Oliver Stone', 'Maya Patel', 'Hiroshi Yamamoto', 'Isabella Rossi'
-    ][i % 12],
-    artisanSlug: `artisan-${(i % 12) + 1}`,
-    imageUrl: `https://images.unsplash.com/photo-${1578300000000 + i * 1000}?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80`,
+    // Add image property here
+    image: `https://images.unsplash.com/photo-${157000000000 + i * 100}?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80`,
     galleryImages: [],
     rating: 3.5 + Math.random() * 1.5,
     reviewCount: Math.floor(Math.random() * 200) + 20,
@@ -129,6 +110,13 @@ const mockProducts: Product[] = Array.from({ length: 44 }, (_, i) => {
       estimatedDays: Math.floor(Math.random() * 7) + 2,
       locations: ['Worldwide'],
     },
+    artisanId: (i % 12) + 1,
+    artisanName: [
+      'Elena Rodriguez', 'Kaito Tanaka', 'Sophie Martin', 'Marcus Chen', 
+      'Aisha Patel', 'Carlos Silva', 'Yuki Nakamura', 'Fatima Al-Mansoori',
+      'Oliver Stone', 'Maya Patel', 'Hiroshi Yamamoto', 'Isabella Rossi'
+    ][i % 12],
+    artisanSlug: `artisan-${(i % 12) + 1}`,
     createdAt: '2024-01-15',
     updatedAt: '2024-01-15',
   };
@@ -139,7 +127,7 @@ const categories: Category[] = [
     id: 'pottery', 
     name: 'Pottery', 
     count: 48, 
-    icon: '🏺', 
+    icon: '??', 
     color: 'from-orange-500 to-amber-500',
     bgColor: 'bg-orange-50',
     textColor: 'text-orange-800'
@@ -148,7 +136,7 @@ const categories: Category[] = [
     id: 'woodwork', 
     name: 'Woodwork', 
     count: 62, 
-    icon: '🪵', 
+    icon: '??', 
     color: 'from-emerald-500 to-green-500',
     bgColor: 'bg-emerald-50',
     textColor: 'text-emerald-800'
@@ -157,7 +145,7 @@ const categories: Category[] = [
     id: 'textiles', 
     name: 'Textiles', 
     count: 45, 
-    icon: '🧵', 
+    icon: '??', 
     color: 'from-pink-500 to-rose-500',
     bgColor: 'bg-pink-50',
     textColor: 'text-pink-800'
@@ -166,7 +154,7 @@ const categories: Category[] = [
     id: 'jewelry', 
     name: 'Jewelry', 
     count: 72, 
-    icon: '💎', 
+    icon: '??', 
     color: 'from-blue-500 to-indigo-500',
     bgColor: 'bg-blue-50',
     textColor: 'text-blue-800'
@@ -175,7 +163,7 @@ const categories: Category[] = [
     id: 'glass', 
     name: 'Glass Art', 
     count: 28, 
-    icon: '🪞', 
+    icon: '??', 
     color: 'from-cyan-500 to-teal-500',
     bgColor: 'bg-cyan-50',
     textColor: 'text-cyan-800'
@@ -184,7 +172,7 @@ const categories: Category[] = [
     id: 'metal', 
     name: 'Metalwork', 
     count: 36, 
-    icon: '⚒️', 
+    icon: '??', 
     color: 'from-gray-600 to-slate-600',
     bgColor: 'bg-gray-100',
     textColor: 'text-gray-800'
@@ -193,7 +181,7 @@ const categories: Category[] = [
     id: 'leather', 
     name: 'Leather', 
     count: 34, 
-    icon: '🧰', 
+    icon: '??', 
     color: 'from-yellow-600 to-amber-600',
     bgColor: 'bg-amber-50',
     textColor: 'text-amber-800'
@@ -625,11 +613,11 @@ export default function MarketplacePage() {
       filtered = filtered.filter((p) => p.rating >= activeFilters.minRating!);
     }
 
-    if (activeFilters.materials.length > 0) {
-      filtered = filtered.filter((p) => 
-        activeFilters.materials.some((m) => p.materials ?? [].includes(m))
-      );
-    }
+  if (activeFilters.materials.length > 0) {
+  filtered = filtered.filter((p) => 
+    p.materials?.some(material => activeFilters.materials.includes(material)) ?? false
+  );
+}
 
     if (activeFilters.inStockOnly) filtered = filtered.filter((p) => p.stock > 0);
     if (activeFilters.onSaleOnly) filtered = filtered.filter((p) => p.discountPercentage ?? 0 > 0);
@@ -638,7 +626,7 @@ export default function MarketplacePage() {
     filtered.sort((a, b) => {
       switch (activeFilters.sortBy) {
         case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.createdAt || new Date()).getTime() - new Date(a.createdAt || new Date()).getTime();
         case 'price-low':
           return a.currentPrice - b.currentPrice;
         case 'price-high':
@@ -922,8 +910,8 @@ export default function MarketplacePage() {
                       <h3 className="text-xl font-bold text-gray-900">Products</h3>
                       <p className="text-sm text-gray-600 mt-1">
                         Showing {filteredProducts.length} items
-                        {activeFilterCount > 0 && ` • ${activeFilterCount} active filters`}
-                        {searchQuery && ` • Search: "${searchQuery}"`}
+                        {activeFilterCount > 0 && ` � ${activeFilterCount} active filters`}
+                        {searchQuery && ` � Search: "${searchQuery}"`}
                       </p>
                     </div>
                   </div>
@@ -1175,9 +1163,3 @@ export default function MarketplacePage() {
     </div>
   );
 }
-
-
-function formatDistanceToNow(arg0: Date, arg1: { addSuffix: boolean; }): string {
-  throw new Error('Function not implemented.');
-}
-

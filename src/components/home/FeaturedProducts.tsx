@@ -19,7 +19,6 @@ const products = [
     artisanImage: "/images/artisans/elena.jpg",
     tags: ["Handmade", "Eco-friendly", "Microwave Safe", "Dishwasher Safe"],
     inStock: true,
-    fastDelivery: true,
     bestSeller: true,
     discount: 22,
   },
@@ -38,7 +37,6 @@ const products = [
     artisanImage: "/images/artisans/james.jpg",
     tags: ["Solid Walnut", "Hand Carved", "Heirloom Quality", "Sustainable"],
     inStock: true,
-    fastDelivery: false,
     bestSeller: true,
     discount: 11,
   },
@@ -57,7 +55,6 @@ const products = [
     artisanImage: "/images/artisans/sophia.jpg",
     tags: ["Sterling Silver", "Natural Turquoise", "Adjustable", "Gift Box"],
     inStock: true,
-    fastDelivery: true,
     bestSeller: false,
     discount: 16,
   },
@@ -76,7 +73,6 @@ const products = [
     artisanImage: "/images/artisans/elena.jpg",
     tags: ["Set of 6", "Dishwasher Safe", "Food Safe", "Oven Safe"],
     inStock: true,
-    fastDelivery: true,
     bestSeller: true,
     discount: 15,
   },
@@ -95,7 +91,6 @@ const products = [
     artisanImage: "/images/artisans/james.jpg",
     tags: ["End Grain", "Juice Groove", "Food Safe Oil", "Reversible"],
     inStock: true,
-    fastDelivery: true,
     bestSeller: false,
     discount: 17,
   },
@@ -114,7 +109,6 @@ const products = [
     artisanImage: "/images/artisans/sophia.jpg",
     tags: ["14K Gold", "Freshwater Pearls", "Hypoallergenic", "Elegant Box"],
     inStock: true,
-    fastDelivery: true,
     bestSeller: true,
     discount: 17,
   },
@@ -273,12 +267,6 @@ export default function FeaturedProducts() {
                       <span className="text-error flex items-center">
                         <Clock className="w-3 h-3 mr-1" />
                         Backorder
-                      </span>
-                    )}
-                    {product.fastDelivery && (
-                      <span className="ml-4 text-text/60 flex items-center">
-                        <Truck className="w-3 h-3 mr-1" />
-                        Fast Delivery
                       </span>
                     )}
                   </div>
