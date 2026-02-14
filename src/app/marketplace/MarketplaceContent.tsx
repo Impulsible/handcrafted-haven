@@ -1,22 +1,8 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars */
-// Update the imports in marketplace/page.tsx:
-"use client";
-
+﻿"use client";
 
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-
-// Helper function to safely get date
-const safeDate = (dateString: string | undefined): Date => {
-  return dateString ? new Date(dateString) : new Date();
-};
-
-// Helper function to safely format date
-const safeFormatDate = (dateString: string | undefined): string => {
-  return dateString 
-    ? formatDistanceToNow(new Date(dateString), { addSuffix: true })
-    : 'Recently added';
-};import {
+import {
   CheckCircle,
   Clock,
   Filter,
@@ -108,14 +94,8 @@ const mockProducts: Product[] = Array.from({ length: 44 }, (_, i) => {
     discountPercentage: discount,
     category: category.name,
     subcategory: category.sub,
-    artisanId: (i % 12) + 1,
-    artisanName: [
-      'Elena Rodriguez', 'Kaito Tanaka', 'Sophie Martin', 'Marcus Chen', 
-      'Aisha Patel', 'Carlos Silva', 'Yuki Nakamura', 'Fatima Al-Mansoori',
-      'Oliver Stone', 'Maya Patel', 'Hiroshi Yamamoto', 'Isabella Rossi'
-    ][i % 12],
-    artisanSlug: `artisan-${(i % 12) + 1}`,
-    imageUrl: `https://images.unsplash.com/photo-${1578300000000 + i * 1000}?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80`,
+    // Add image property here
+    image: `https://images.unsplash.com/photo-${157000000000 + i * 100}?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80`,
     galleryImages: [],
     rating: 3.5 + Math.random() * 1.5,
     reviewCount: Math.floor(Math.random() * 200) + 20,
@@ -130,6 +110,13 @@ const mockProducts: Product[] = Array.from({ length: 44 }, (_, i) => {
       estimatedDays: Math.floor(Math.random() * 7) + 2,
       locations: ['Worldwide'],
     },
+    artisanId: (i % 12) + 1,
+    artisanName: [
+      'Elena Rodriguez', 'Kaito Tanaka', 'Sophie Martin', 'Marcus Chen', 
+      'Aisha Patel', 'Carlos Silva', 'Yuki Nakamura', 'Fatima Al-Mansoori',
+      'Oliver Stone', 'Maya Patel', 'Hiroshi Yamamoto', 'Isabella Rossi'
+    ][i % 12],
+    artisanSlug: `artisan-${(i % 12) + 1}`,
     createdAt: '2024-01-15',
     updatedAt: '2024-01-15',
   };
@@ -626,11 +613,11 @@ export default function MarketplacePage() {
       filtered = filtered.filter((p) => p.rating >= activeFilters.minRating!);
     }
 
-    if (activeFilters.materials.length > 0) {
-      filtered = filtered.filter((p) => 
-        activeFilters.materials.some((m) => p.materials ?? [].includes(m))
-      );
-    }
+  if (activeFilters.materials.length > 0) {
+  filtered = filtered.filter((p) => 
+    p.materials?.some(material => activeFilters.materials.includes(material)) ?? false
+  );
+}
 
     if (activeFilters.inStockOnly) filtered = filtered.filter((p) => p.stock > 0);
     if (activeFilters.onSaleOnly) filtered = filtered.filter((p) => p.discountPercentage ?? 0 > 0);
@@ -639,7 +626,7 @@ export default function MarketplacePage() {
     filtered.sort((a, b) => {
       switch (activeFilters.sortBy) {
         case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.createdAt || new Date()).getTime() - new Date(a.createdAt || new Date()).getTime();
         case 'price-low':
           return a.currentPrice - b.currentPrice;
         case 'price-high':
@@ -1176,9 +1163,3 @@ export default function MarketplacePage() {
     </div>
   );
 }
-
-
-function formatDistanceToNow(arg0: Date, arg1: { addSuffix: boolean; }): string {
-  throw new Error('Function not implemented.');
-}
-
