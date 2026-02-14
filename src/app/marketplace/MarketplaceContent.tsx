@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 // Components
 import dynamic from 'next/dynamic';
 import ProductFilters from '@/components/marketplace/ProductFilters';
-import SortDropdown, { SortOption } from '@/components/marketplace/SortDropdown';
+import SortDropdown from '@/components/marketplace/SortDropdown';
 import Pagination from '@/components/marketplace/Pagination';
 import Breadcrumbs from '@/components/marketplace/Breadcrumbs';
 import FeaturedArtisans from '@/components/marketplace/FeaturedArtisans';
@@ -81,44 +81,33 @@ const mockProducts: Product[] = Array.from({ length: 44 }, (_, i) => {
   const basePrice = [25, 45, 65, 85, 120, 180, 250, 350][catIndex % 8];
   const discount = Math.random() > 0.6 ? Math.floor(Math.random() * 40) + 10 : 0;
   const currentPrice = Math.floor(basePrice * (1 - discount / 100));
-  const originalPrice = discount > 0 ? basePrice : currentPrice;
   
   return {
     id: i + 1,
-    slug: `product-${i + 1}`,
     name: `Handcrafted ${category.name} ${category.sub}`,
-    description: `Beautifully crafted ${category.name.toLowerCase()} piece made with traditional techniques and premium materials. Each piece is unique and tells a story of craftsmanship.`,
+    description: `Beautifully crafted ${category.name.toLowerCase()} piece made with traditional techniques and premium materials.`,
     shortDescription: 'Handmade with love and care by skilled artisans',
-    currentPrice,
-    originalPrice,
-    discountPercentage: discount,
-    category: category.name,
-    subcategory: category.sub,
-    // Add image property here
-    image: `https://images.unsplash.com/photo-${157000000000 + i * 100}?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80`,
-    galleryImages: [],
-    rating: 3.5 + Math.random() * 1.5,
-    reviewCount: Math.floor(Math.random() * 200) + 20,
-    stock: Math.floor(Math.random() * 50) + 5,
-    isNew: i < 12,
-    isBestSeller: i % 8 === 0,
-    isFeatured: i % 6 === 0,
-    tags: ['Handmade', 'Artisanal', 'Sustainable', 'Unique', 'Premium'],
-    materials: [[category.name], ['Organic'], ['Natural'], ['Recycled']][i % 4] as string[],
-    shipping: {
-      isFreeShipping: i % 4 === 0,
-      estimatedDays: Math.floor(Math.random() * 7) + 2,
-      locations: ['Worldwide'],
-    },
+    price: currentPrice,
     artisanId: (i % 12) + 1,
     artisanName: [
       'Elena Rodriguez', 'Kaito Tanaka', 'Sophie Martin', 'Marcus Chen', 
       'Aisha Patel', 'Carlos Silva', 'Yuki Nakamura', 'Fatima Al-Mansoori',
       'Oliver Stone', 'Maya Patel', 'Hiroshi Yamamoto', 'Isabella Rossi'
     ][i % 12],
-    artisanSlug: `artisan-${(i % 12) + 1}`,
+    category: category.name,
+    images: [`https://images.unsplash.com/photo-${157000000000 + i * 100}?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80`],
+    rating: 3.5 + Math.random() * 1.5,
+    reviews: Math.floor(Math.random() * 200) + 20,
+    inStock: true,
     createdAt: '2024-01-15',
-    updatedAt: '2024-01-15',
+    currentPrice,
+    materials: [[category.name], ['Organic'], ['Natural'], ['Recycled']][i % 4] as string[],
+    stock: Math.floor(Math.random() * 50) + 5,
+    discountPercentage: discount,
+    tags: ['Handmade', 'Artisanal', 'Sustainable', 'Unique', 'Premium'],
+    isBestSeller: i % 8 === 0,
+    isFeatured: i % 6 === 0,
+    artisanSlug: `artisan-${(i % 12) + 1}`,
   };
 });
 
@@ -208,24 +197,17 @@ function SoftCard({ children, className = '' }: { children: React.ReactNode; cla
   );
 }
 
-function HeroBanner({
-  totalCount,
-}: {
-  totalCount: number;
-}) {
+function HeroBanner({ totalCount }: { totalCount: number }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-secondary/90 min-h-[500px]">
-      {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{
           backgroundImage: 'url("https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
         }}
       />
-      {/* Dark Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/80 to-secondary/90 mix-blend-multiply" />
       
-      {/* Pattern overlay */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -233,7 +215,6 @@ function HeroBanner({
         }} />
       </div>
 
-      {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl"></div>
 
@@ -275,7 +256,6 @@ function HeroBanner({
             </div>
           </div>
 
-          {/* Right side stats */}
           <div className="lg:col-span-5">
             <SoftCard className="p-6 bg-white/10 backdrop-blur-lg border-white/20 text-white">
               <div className="flex items-center gap-3 mb-6">
@@ -386,48 +366,34 @@ function useLiveStats() {
 
   const hasInitializedRef = useRef(false);
 
-  // Update stats function
   const updateStats = useCallback(() => {
-    // Simulate real-time changes
-    const randomArtisans = Math.floor(250 + Math.random() * 50);
-    const randomProducts = Math.floor(5000 + Math.random() * 1000);
-    const randomCountries = Math.floor(50 + Math.random() * 10);
-    const randomSatisfaction = Math.min(100, Math.floor(98 + Math.random() * 3 - 1.5));
-    
     setStats({
-      artisans: randomArtisans,
-      products: randomProducts,
-      countries: randomCountries,
-      satisfaction: randomSatisfaction,
+      artisans: Math.floor(250 + Math.random() * 50),
+      products: Math.floor(5000 + Math.random() * 1000),
+      countries: Math.floor(50 + Math.random() * 10),
+      satisfaction: Math.min(100, Math.floor(98 + Math.random() * 3 - 1.5)),
       lastUpdated: new Date(),
     });
   }, []);
 
-  // Initialize stats on mount (non-synchronously)
   useEffect(() => {
     if (!hasInitializedRef.current) {
-      const timer = setTimeout(() => {
-        updateStats();
-      }, 0);
+      const timer = setTimeout(updateStats, 0);
       hasInitializedRef.current = true;
-      
       return () => clearTimeout(timer);
     }
   }, [updateStats]);
 
-  // Update stats every 24 hours
   useEffect(() => {
-    const interval = setInterval(updateStats, 86400000); // 24 hours
+    const interval = setInterval(updateStats, 86400000);
     return () => clearInterval(interval);
   }, [updateStats]);
 
-  // Also update when page is active and it's been 24 hours
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         const hoursSinceUpdate = (Date.now() - stats.lastUpdated.getTime()) / (1000 * 60 * 60);
         if (hoursSinceUpdate >= 24) {
-          // Schedule update on next tick to avoid synchronous setState
           setTimeout(updateStats, 0);
         }
       }
@@ -444,7 +410,6 @@ function QuickStats() {
   const stats = useLiveStats();
   const [timeSinceUpdate, setTimeSinceUpdate] = useState('');
 
-  // Calculate time since last update
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -452,15 +417,11 @@ function QuickStats() {
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
       
-      if (diffHours > 0) {
-        setTimeSinceUpdate(`Updated ${diffHours}h ago`);
-      } else {
-        setTimeSinceUpdate(`Updated ${diffMinutes}m ago`);
-      }
+      setTimeSinceUpdate(diffHours > 0 ? `Updated ${diffHours}h ago` : `Updated ${diffMinutes}m ago`);
     };
 
     updateTime();
-    const interval = setInterval(updateTime, 60000); // Update every minute
+    const interval = setInterval(updateTime, 60000);
     return () => clearInterval(interval);
   }, [stats.lastUpdated]);
 
@@ -540,7 +501,6 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
 
-  // Debounce search query to avoid too many re-renders
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -563,13 +523,16 @@ export default function MarketplacePage() {
       sortBy: (params.get('sortBy') as FilterState['sortBy']) || 'featured',
       inStockOnly: params.get('inStock') === 'true',
       onSaleOnly: params.get('onSale') === 'true',
+      category: '',
+      artisan: '',
+      inStock: false,
+      search: searchQuery,
     };
-  }, [searchParams]);
+  }, [searchParams, searchQuery]);
 
   const [activeFilters, setActiveFilters] = useState<FilterState>(urlFilters);
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
-  // Search function that properly filters products
   const searchProducts = useCallback((products: Product[], query: string) => {
     if (!query.trim()) return products;
     
@@ -579,11 +542,10 @@ export default function MarketplacePage() {
       const searchableText = `
         ${product.name.toLowerCase()}
         ${product.category.toLowerCase()}
-        ${product.subcategory ?? "".toLowerCase()}
-        ${product.description ?? "".toLowerCase()}
+        ${product.description?.toLowerCase() || ''}
         ${product.artisanName.toLowerCase()}
-        ${product.materials ?? [].join(' ').toLowerCase()}
-        ${product.tags.join(' ').toLowerCase()}
+        ${product.materials?.join(' ').toLowerCase() || ''}
+        ${product.tags?.join(' ').toLowerCase() || ''}
       `;
       
       return searchTerms.every(term => searchableText.includes(term));
@@ -593,12 +555,10 @@ export default function MarketplacePage() {
   const filteredProducts = useMemo(() => {
     let filtered = [...mockProducts];
 
-    // Apply search filter first
     if (debouncedSearchQuery.trim()) {
       filtered = searchProducts(filtered, debouncedSearchQuery);
     }
 
-    // Apply other filters
     if (activeFilters.categories.length > 0) {
       filtered = filtered.filter((p) => 
         activeFilters.categories.includes(p.category.toLowerCase())
@@ -606,31 +566,36 @@ export default function MarketplacePage() {
     }
 
     filtered = filtered.filter(
-      (p) => p.currentPrice >= activeFilters.priceRange[0] && p.currentPrice <= activeFilters.priceRange[1]
+      (p) => (p.currentPrice ?? p.price) >= activeFilters.priceRange[0] && 
+             (p.currentPrice ?? p.price) <= activeFilters.priceRange[1]
     );
 
     if (activeFilters.minRating) {
       filtered = filtered.filter((p) => p.rating >= activeFilters.minRating!);
     }
 
-  if (activeFilters.materials.length > 0) {
-  filtered = filtered.filter((p) => 
-    p.materials?.some(material => activeFilters.materials.includes(material)) ?? false
-  );
-}
+    if (activeFilters.materials.length > 0) {
+      filtered = filtered.filter((p) => 
+        p.materials?.some(material => activeFilters.materials.includes(material)) ?? false
+      );
+    }
 
-    if (activeFilters.inStockOnly) filtered = filtered.filter((p) => p.stock > 0);
-    if (activeFilters.onSaleOnly) filtered = filtered.filter((p) => p.discountPercentage ?? 0 > 0);
+    if (activeFilters.inStockOnly) {
+      filtered = filtered.filter((p) => (p.stock ?? 0) > 0);
+    }
+    
+    if (activeFilters.onSaleOnly) {
+      filtered = filtered.filter((p) => (p.discountPercentage ?? 0) > 0);
+    }
 
-    // Apply sorting
     filtered.sort((a, b) => {
       switch (activeFilters.sortBy) {
         case 'newest':
           return new Date(b.createdAt || new Date()).getTime() - new Date(a.createdAt || new Date()).getTime();
         case 'price-low':
-          return a.currentPrice - b.currentPrice;
+          return (a.currentPrice ?? a.price) - (b.currentPrice ?? b.price);
         case 'price-high':
-          return b.currentPrice - a.currentPrice;
+          return (b.currentPrice ?? b.price) - (a.currentPrice ?? a.price);
         case 'rating':
           return b.rating - a.rating;
         case 'bestsellers':
@@ -644,10 +609,8 @@ export default function MarketplacePage() {
     return filtered;
   }, [activeFilters, debouncedSearchQuery, searchProducts]);
 
-  // Separate useEffect for loading state - FIXED: Use setTimeout to avoid synchronous setState
   useEffect(() => {
     if (filteredProducts.length > 0) {
-      // Use setTimeout to schedule the state update on the next tick
       const timer = setTimeout(() => {
         setIsLoading(false);
       }, 0);
@@ -699,25 +662,26 @@ export default function MarketplacePage() {
     if (filters.onSaleOnly) {
       params.set('onSale', 'true');
     }
+    if (searchQuery) {
+      params.set('q', searchQuery);
+    }
     if (page > 1) {
       params.set('page', page.toString());
     }
 
     const qs = params.toString();
     router.push(`/marketplace${qs ? `?${qs}` : ''}`, { scroll: false });
-  }, [router]);
+  }, [router, searchQuery]);
 
   const handleFilterChange = useCallback((filters: FilterState) => {
-    setActiveFilters(filters);
-    // Use setTimeout to avoid synchronous setState
+    setActiveFilters({ ...filters, search: searchQuery });
     setTimeout(() => setIsLoading(true), 0);
-    updateUrlParams(filters, 1);
-  }, [updateUrlParams]);
+    updateUrlParams({ ...filters, search: searchQuery }, 1);
+  }, [updateUrlParams, searchQuery]);
 
-  const handleSortChange = useCallback((sortBy: SortOption) => {
+  const handleSortChange = useCallback((sortBy: string) => {
     const next = { ...activeFilters, sortBy: sortBy as FilterState['sortBy'] };
     setActiveFilters(next);
-    // Use setTimeout to avoid synchronous setState
     setTimeout(() => setIsLoading(true), 0);
     updateUrlParams(next, currentPage);
   }, [activeFilters, currentPage, updateUrlParams]);
@@ -729,25 +693,26 @@ export default function MarketplacePage() {
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-    // Use setTimeout to avoid synchronous setState
     setTimeout(() => setIsLoading(true), 0);
-    // Reset to page 1 when searching
     updateUrlParams(activeFilters, 1);
   }, [activeFilters, updateUrlParams]);
 
   const clearAll = useCallback(() => {
-    const defaultFilters = {
+    const defaultFilters: FilterState = {
       categories: [],
       priceRange: [0, 1000] as [number, number],
       minRating: null,
       materials: [],
       artisanLocations: [],
-      sortBy: 'featured' as const,
+      sortBy: 'featured',
       inStockOnly: false,
       onSaleOnly: false,
+      category: '',
+      artisan: '',
+      inStock: false,
+      search: '',
     };
     setSearchQuery('');
-    // Use setTimeout to avoid synchronous setState
     setTimeout(() => setIsLoading(true), 0);
     handleFilterChange(defaultFilters);
   }, [handleFilterChange]);
@@ -765,26 +730,21 @@ export default function MarketplacePage() {
 
   const handleAddToCart = useCallback((product: Product) => {
     console.log('Adding to cart:', product);
-    // Implement add to cart functionality
   }, []);
 
   const handleQuickView = useCallback((product: Product) => {
     console.log('Quick view:', product);
-    // Implement quick view functionality
   }, []);
 
   const handleAddToWishlist = useCallback((product: Product) => {
     console.log('Adding to wishlist:', product);
-    // Implement wishlist functionality
   }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
-      {/* Hero Banner with Image */}
       <HeroBanner totalCount={filteredProducts.length} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* ALWAYS VISIBLE SEARCH BAR */}
         <div className="mb-8">
           <SoftCard className="p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -833,14 +793,11 @@ export default function MarketplacePage() {
           </SoftCard>
         </div>
 
-        {/* Live Quick Stats */}
         <QuickStats />
 
-        {/* Category Chips */}
         <CategoryChips activeFilters={activeFilters} onToggleCategory={toggleCategory} />
 
         <div className="mt-8 flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
           <aside className="hidden lg:block w-80 flex-shrink-0">
             <div className="sticky top-24 space-y-6">
               <SoftCard className="p-6">
@@ -883,7 +840,6 @@ export default function MarketplacePage() {
                 )}
               </SoftCard>
 
-              {/* Featured Artisans Sidebar */}
               <SoftCard className="p-5">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 rounded-lg bg-yellow-100">
@@ -891,14 +847,12 @@ export default function MarketplacePage() {
                   </div>
                   <h3 className="font-semibold text-gray-900">Featured Artisans</h3>
                 </div>
-                <FeaturedArtisans artisans={[]} />
+                <FeaturedArtisans />
               </SoftCard>
             </div>
           </aside>
 
-          {/* Main Results */}
           <main className="flex-1">
-            {/* Results Header */}
             <SoftCard className="p-6 mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -918,13 +872,11 @@ export default function MarketplacePage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {/* Sort Dropdown */}
                   <SortDropdown 
                     value={activeFilters.sortBy} 
                     onChange={handleSortChange} 
                   />
 
-                  {/* Mobile Filters Button */}
                   <Button
                     variant="outline"
                     onClick={() => setShowMobileFilters(true)}
@@ -939,7 +891,6 @@ export default function MarketplacePage() {
                     )}
                   </Button>
 
-                  {/* Clear Button */}
                   {activeFilterCount > 0 && (
                     <Button 
                       variant="outline" 
@@ -954,7 +905,6 @@ export default function MarketplacePage() {
               </div>
             </SoftCard>
 
-            {/* Active Filters Display */}
             {activeFilterCount > 0 && (
               <SoftCard className="p-5 mb-6">
                 <div className="flex items-center justify-between mb-4">
@@ -975,14 +925,14 @@ export default function MarketplacePage() {
                 <div className="flex flex-wrap gap-2">
                   {activeFilters.categories.map((category) => {
                     const cat = categories.find(c => c.id === category);
-                    return (
+                    return cat ? (
                       <Badge 
                         key={category} 
                         variant="secondary" 
                         className="gap-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
                       >
-                        <span className="text-lg">{cat?.icon}</span>
-                        {cat?.name}
+                        <span className="text-lg">{cat.icon}</span>
+                        {cat.name}
                         <button
                           onClick={() => {
                             const newFilters = {
@@ -996,13 +946,12 @@ export default function MarketplacePage() {
                           <X className="w-3 h-3" />
                         </button>
                       </Badge>
-                    );
+                    ) : null;
                   })}
                 </div>
               </SoftCard>
             )}
 
-            {/* Products Grid */}
             <ProductGrid
               products={paginatedProducts}
               loading={isLoading}
@@ -1035,23 +984,6 @@ export default function MarketplacePage() {
                         Clear Search
                       </Button>
                     )}
-                    <Button 
-                      variant="outline"
-                      onClick={() => handleFilterChange({
-                        categories: [],
-                        priceRange: [0, 1000],
-                        minRating: null,
-                        materials: [],
-                        artisanLocations: [],
-                        sortBy: 'featured',
-                        inStockOnly: false,
-                        onSaleOnly: false,
-                      })}
-                      className="gap-2 border-gray-300"
-                    >
-                      <Filter className="w-4 h-4" />
-                      Reset Filters
-                    </Button>
                   </div>
                 </div>
               }
@@ -1060,7 +992,6 @@ export default function MarketplacePage() {
               onAddToWishlist={handleAddToWishlist}
             />
 
-            {/* Pagination */}
             {filteredProducts.length > 0 && totalPages > 1 && (
               <div className="mt-10">
                 <SoftCard className="p-6">
@@ -1075,12 +1006,10 @@ export default function MarketplacePage() {
               </div>
             )}
 
-            {/* Collection Spotlight */}
             <div className="mt-16">
               <CollectionSpotlight />
             </div>
 
-            {/* Mobile Featured Artisans */}
             <div className="lg:hidden mt-16">
               <SoftCard className="p-5">
                 <div className="flex items-center gap-3 mb-4">
@@ -1089,14 +1018,13 @@ export default function MarketplacePage() {
                   </div>
                   <h3 className="font-semibold text-gray-900">Featured Artisans</h3>
                 </div>
-                <FeaturedArtisans artisans={[]} />
+                <FeaturedArtisans />
               </SoftCard>
             </div>
           </main>
         </div>
       </div>
 
-      {/* Mobile Filters Modal */}
       {showMobileFilters && (
         <>
           <div
@@ -1135,7 +1063,6 @@ export default function MarketplacePage() {
                 availableCategories={categories}
                 availableMaterials={materials}
                 availableLocations={locations}
-                mobile={true}
               />
 
               <div className="sticky bottom-0 bg-white pt-6 mt-6 border-t border-gray-200">
@@ -1163,3 +1090,4 @@ export default function MarketplacePage() {
     </div>
   );
 }
+

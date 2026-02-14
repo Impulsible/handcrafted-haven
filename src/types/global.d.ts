@@ -1,0 +1,28 @@
+﻿declare module 'lucide-react' {
+  export const Star: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Heart: React.FC<React.SVGProps<SVGSVGElement>>
+  export const ShoppingCart: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Filter: React.FC<React.SVGProps<SVGSVGElement>>
+  export const ChevronDown: React.FC<React.SVGProps<SVGSVGElement>>
+  export const X: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Search: React.FC<React.SVGProps<SVGSVGElement>>
+  export const MapPin: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Package: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Award: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Grid3x3: React.FC<React.SVGProps<SVGSVGElement>>
+  export const LayoutList: React.FC<React.SVGProps<SVGSVGElement>>
+  export const SlidersHorizontal: React.FC<React.SVGProps<SVGSVGElement>>
+  export const ChevronLeft: React.FC<React.SVGProps<SVGSVGElement>>
+  export const ChevronRight: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Check: React.FC<React.SVGProps<SVGSVGElement>>
+  export const ChevronUp: React.FC<React.SVGProps<SVGSVGElement>>
+  export const CheckCircle: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Clock: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Sparkles: React.FC<React.SVGProps<SVGSVGElement>>
+  export const TrendingUp: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Zap: React.FC<React.SVGProps<SVGSVGElement>>
+  export const ShoppingBag: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Truck: React.FC<React.SVGProps<SVGSVGElement>>
+  export const Shield: React.FC<React.SVGProps<SVGSVGElement>>
+  export const RefreshCw: React.FC<React.SVGProps<SVGSVGElement>>
+}
