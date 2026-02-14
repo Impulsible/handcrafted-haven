@@ -1177,7 +1177,3 @@ export default function MarketplacePage() {
 }
 
 
-function formatDistanceToNow(arg0: Date, arg1: { addSuffix: boolean; }): string {
-  throw new Error('Function not implemented.');
-}
-

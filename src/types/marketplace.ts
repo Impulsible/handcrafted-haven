@@ -1,133 +1,34 @@
-export interface Product {
+﻿export interface Product {
   id: number;
-  slug: string;
   name: string;
-  description: string;
-  shortDescription: string;
-  currentPrice: number;
-  originalPrice: number;
-  discountPercentage: number;
-  category: string;
-  subcategory: string;
-  artisanId: number;
   artisanName: string;
-  artisanSlug: string;
-  imageUrl: string;
-  galleryImages: string[];
+  currentPrice: number;
+  originalPrice?: number;
+  discountPercentage?: number;
   rating: number;
   reviewCount: number;
-  stock: number;
-  isNew: boolean;
-  isBestSeller: boolean;
-  isFeatured: boolean;
+  image: string;
+  category: string;
+  subcategory?: string;
   tags: string[];
-  materials: string[];
-  dimensions?: {
-    length?: number;
-    width?: number;
-    height?: number;
-    weight?: number;
-    unit?: string;
-  };
-  shipping: {
+  stock: number;
+  inStock?: boolean;
+  fastDelivery?: boolean;
+  isNew?: boolean;
+  isBestSeller?: boolean;
+  isFeatured?: boolean;
+  description?: string;
+  shortDescription?: string;
+  artisanId?: number;
+  artisanSlug?: string;
+  materials?: string[];
+  shipping?: {
     isFreeShipping: boolean;
     estimatedDays: number;
     locations: string[];
   };
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Artisan {
-  id: number;
-  slug: string;
-  name: string;
-  bio: string;
-  fullBio: string;
-  specialty: string;
-  location: string;
-  country: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  yearsExperience: number;
-  rating: number;
-  reviewCount: number;
-  productCount: number;
-  followerCount: number;
-  avatarUrl: string;
-  coverImageUrl: string;
-  galleryImages: string[];
-  isVerified: boolean;
-  isFeatured: boolean;
-  badges: string[];
-  materials: string[];
-  techniques: string[];
-  story: string;
-  awards?: Array<{
-    name: string;
-    year: number;
-    organization: string;
-  }>;
-  socialLinks?: {
-    website?: string;
-    instagram?: string;
-    facebook?: string;
-    youtube?: string;
-  };
-  joinedDate: string;
-  lastActive: string;
-}
-
-export interface Collection {
-  id: number;
-  slug: string;
-  name: string;
-  description: string;
-  longDescription?: string;
-  category: string;
-  featuredImage: string;
-  secondaryImage: string;
-  productCount: number;
-  artisanCount: number;
-  rating: number;
-  startDate: string;
-  endDate: string;
-  isActive: boolean;
-  isTrending: boolean;
-  discountPercentage?: number;
-  tags: string[];
-  featuredProducts: Array<{
-    id: number;
-    slug: string;
-    name: string;
-    price: number;
-    imageUrl: string;
-    artisanName: string;
-    artisanSlug: string;
-  }>;
-  curator?: {
-    name: string;
-    title: string;
-    avatarUrl: string;
-  };
-}
-
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  icon?: string;
-  imageUrl?: string;
-  productCount: number;
-  subcategories: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    productCount: number;
-  }>;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface FilterState {
@@ -139,34 +40,30 @@ export interface FilterState {
   sortBy: 'featured' | 'newest' | 'price-low' | 'price-high' | 'rating' | 'bestsellers';
   inStockOnly: boolean;
   onSaleOnly: boolean;
+  category?: string;
+  artisan?: string;
+  inStock?: boolean;
+  fastDelivery?: boolean;
+  search?: string;
+  tags?: string[];
 }
 
-export interface CartItem {
-  productId: number;
-  quantity: number;
-  product: Product;
+export type SortOption = 'featured' | 'newest' | 'price-low' | 'price-high' | 'rating' | 'bestsellers';
+
+export interface ProductGridProps {
+  products: Product[];
+  loading?: boolean;
+  onAddToCart?: (product: Product) => void;
+  onQuickView?: (product: Product) => void;
+  onAddToWishlist?: (product: Product) => void;
+  emptyMessage?: React.ReactNode;
 }
 
-export interface Review {
-  id: number;
-  productId: number;
-  userId: number;
-  userName: string;
-  userAvatar: string;
-  rating: number;
-  title: string;
-  comment: string;
-  images?: string[];
-  isVerifiedPurchase: boolean;
-  helpfulCount: number;
-  createdAt: string;
-}
-
-export interface MarketplaceStats {
-  totalProducts: number;
-  totalArtisans: number;
-  totalCountries: number;
-  totalSales: number;
-  averageRating: number;
-  featuredCount: number;
+export interface ProductFiltersProps {
+  onFilterChange: (filters: FilterState) => void;
+  initialFilters: FilterState;
+  availableCategories: Array<{ id: string; name: string; count: number; icon?: string }>;
+  availableMaterials: string[];
+  availableLocations: string[];
+  mobile?: boolean;
 }

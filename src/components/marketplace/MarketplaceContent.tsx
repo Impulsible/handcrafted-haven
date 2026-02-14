@@ -1,1165 +1,528 @@
-// Update the imports in marketplace/page.tsx:
-"use client";
+﻿"use client";
 
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { Filter, Grid3x3, LayoutList, ChevronDown } from "lucide-react";
 
-import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  CheckCircle,
-  Clock,
-  Filter,
-  Search,
-  SlidersHorizontal,
-  Sparkles,
-  Star,
-  TrendingUp,
-  X,
-  Zap,
-  ShoppingBag,
-  Award,
-  Truck,
-  Shield,
-  RefreshCw,
-} from 'lucide-react';
+// Components
+import dynamic from "next/dynamic";
 
+// UI Components
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-// Components
-import dynamic from 'next/dynamic';
-import ProductFilters from '@/components/marketplace/ProductFilters';
-import SortDropdown, { SortOption } from '@/components/marketplace/SortDropdown';
-import Pagination from '@/components/marketplace/Pagination';
-import Breadcrumbs from '@/components/marketplace/Breadcrumbs';
-import FeaturedArtisans from '@/components/marketplace/FeaturedArtisans';
-import CollectionSpotlight from '@/components/marketplace/CollectionSpotlight';
+// Dynamic imports for better performance
+const ProductGrid = dynamic(() => import("@/components/marketplace/ProductGrid"), {
+  loading: () => <div className="h-96 flex items-center justify-center">Loading products...</div>
+});
 
-// Dynamically import ProductGrid
-const ProductGrid = dynamic(() => import('@/components/marketplace/ProductGrid'), {
-  ssr: false,
-  loading: () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="animate-pulse">
-          <div className="bg-gray-200 rounded-lg aspect-square mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-        </div>
-      ))}
-    </div>
-  ),
+const ProductFilters = dynamic(() => import("@/components/marketplace/ProductFilters"), {
+  loading: () => <div className="h-96 flex items-center justify-center">Loading filters...</div>
+});
+
+const SortDropdown = dynamic(() => import("@/components/marketplace/SortDropdown"), {
+  loading: () => <div className="h-10 w-40 bg-gray-200 animate-pulse rounded"></div>
+});
+
+const CollectionSpotlight = dynamic(() => import("@/components/marketplace/CollectionSpotlight"), {
+  loading: () => <div className="h-80 bg-gray-200 animate-pulse rounded-xl"></div>
+});
+
+const FeaturedArtisans = dynamic(() => import("@/components/marketplace/FeaturedArtisans"), {
+  loading: () => <div className="h-64 bg-gray-200 animate-pulse rounded-xl"></div>
 });
 
 // Types
-import type { Product, FilterState } from '@/types/marketplace';
+import type { Product, FilterState } from "@/types/marketplace";
+import type { SortOption } from "@/components/marketplace/SortDropdown";
 
-/* ----------------------------- Local Types ----------------------------- */
-type Category = {
-  id: string;
-  name: string;
-  count: number;
-  icon: string;
-  color: string;
-  bgColor: string;
-  textColor: string;
+// Simple adapter function - using object lookup to avoid TypeScript switch checking
+const adaptSortOption = (sortBy: SortOption): FilterState['sortBy'] => {
+  // Use a lookup object with string keys
+  const sortMap: { [key: string]: FilterState['sortBy'] } = {
+    'featured': 'featured',
+    'newest': 'newest',
+    'price-low': 'price-low',
+    'price-high': 'price-high',
+    'rating': 'rating',
+    'bestsellers': 'bestsellers',
+    'popularity': 'featured'
+  };
+  
+  return sortMap[sortBy] || 'featured';
 };
 
-/* ----------------------------- Mock Data ----------------------------- */
-const mockProducts: Product[] = Array.from({ length: 44 }, (_, i) => {
-  const categories = [
-    { name: 'Pottery', sub: 'Mugs' },
-    { name: 'Woodwork', sub: 'Bowls' },
-    { name: 'Textiles', sub: 'Scarves' },
-    { name: 'Jewelry', sub: 'Necklaces' },
-    { name: 'Glass', sub: 'Vases' },
-    { name: 'Metalwork', sub: 'Sculptures' },
-    { name: 'Leather', sub: 'Wallets' },
-    { name: 'Paper', sub: 'Art' },
-  ];
-  
-  const catIndex = i % 8;
-  const category = categories[catIndex];
-  
-  const basePrice = [25, 45, 65, 85, 120, 180, 250, 350][catIndex % 8];
-  const discount = Math.random() > 0.6 ? Math.floor(Math.random() * 40) + 10 : 0;
-  const currentPrice = Math.floor(basePrice * (1 - discount / 100));
-  const originalPrice = discount > 0 ? basePrice : currentPrice;
-  
-  return {
-    id: i + 1,
-    slug: `product-${i + 1}`,
-    name: `Handcrafted ${category.name} ${category.sub}`,
-    description: `Beautifully crafted ${category.name.toLowerCase()} piece made with traditional techniques and premium materials. Each piece is unique and tells a story of craftsmanship.`,
-    shortDescription: 'Handmade with love and care by skilled artisans',
-    currentPrice,
-    originalPrice,
-    discountPercentage: discount,
-    category: category.name,
-    subcategory: category.sub,
-    artisanId: (i % 12) + 1,
-    artisanName: [
-      'Elena Rodriguez', 'Kaito Tanaka', 'Sophie Martin', 'Marcus Chen', 
-      'Aisha Patel', 'Carlos Silva', 'Yuki Nakamura', 'Fatima Al-Mansoori',
-      'Oliver Stone', 'Maya Patel', 'Hiroshi Yamamoto', 'Isabella Rossi'
-    ][i % 12],
-    artisanSlug: `artisan-${(i % 12) + 1}`,
-    imageUrl: `https://images.unsplash.com/photo-${1578300000000 + i * 1000}?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80`,
-    galleryImages: [],
-    rating: 3.5 + Math.random() * 1.5,
-    reviewCount: Math.floor(Math.random() * 200) + 20,
-    stock: Math.floor(Math.random() * 50) + 5,
-    isNew: i < 12,
-    isBestSeller: i % 8 === 0,
-    isFeatured: i % 6 === 0,
-    tags: ['Handmade', 'Artisanal', 'Sustainable', 'Unique', 'Premium'],
-    materials: [[category.name], ['Organic'], ['Natural'], ['Recycled']][i % 4] as string[],
+// Mock data for initial render
+const mockProducts: Product[] = [
+  {
+    id: 1,
+    name: "Handwoven Ceramic Vase",
+    artisanName: "Elena Pottery",
+    currentPrice: 89.99,
+    originalPrice: 105.99,
+    discountPercentage: 15,
+    rating: 4.8,
+    reviewCount: 124,
+    image: "https://images.unsplash.com/photo-1612196808214-b7e239e5dd43?w=500&h=500&fit=crop",
+    category: "Pottery",
+    subcategory: "Vases",
+    tags: ["handmade", "ceramic"],
+    stock: 15,
+    inStock: true,
+    fastDelivery: true,
+    isNew: true,
+    isBestSeller: false,
+    isFeatured: true,
+    materials: ["Clay", "Glaze"],
     shipping: {
-      isFreeShipping: i % 4 === 0,
-      estimatedDays: Math.floor(Math.random() * 7) + 2,
-      locations: ['Worldwide'],
-    },
-    createdAt: '2024-01-15',
-    updatedAt: '2024-01-15',
-  };
-});
-
-const categories: Category[] = [
-  { 
-    id: 'pottery', 
-    name: 'Pottery', 
-    count: 48, 
-    icon: '🏺', 
-    color: 'from-orange-500 to-amber-500',
-    bgColor: 'bg-orange-50',
-    textColor: 'text-orange-800'
+      isFreeShipping: true,
+      estimatedDays: 3,
+      locations: ["Worldwide"]
+    }
   },
-  { 
-    id: 'woodwork', 
-    name: 'Woodwork', 
-    count: 62, 
-    icon: '🪵', 
-    color: 'from-emerald-500 to-green-500',
-    bgColor: 'bg-emerald-50',
-    textColor: 'text-emerald-800'
+  {
+    id: 2,
+    name: "Solid Oak Cutting Board",
+    artisanName: "Woodcraft by John",
+    currentPrice: 65.50,
+    originalPrice: 75.00,
+    discountPercentage: 13,
+    rating: 4.9,
+    reviewCount: 89,
+    image: "https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=500&h=500&fit=crop",
+    category: "Woodwork",
+    subcategory: "Kitchen",
+    tags: ["handmade", "kitchen", "oak"],
+    stock: 8,
+    inStock: true,
+    fastDelivery: true,
+    isNew: false,
+    isBestSeller: true,
+    isFeatured: true,
+    materials: ["Oak", "Mineral Oil"],
+    shipping: {
+      isFreeShipping: true,
+      estimatedDays: 4,
+      locations: ["Worldwide"]
+    }
   },
-  { 
-    id: 'textiles', 
-    name: 'Textiles', 
-    count: 45, 
-    icon: '🧵', 
-    color: 'from-pink-500 to-rose-500',
-    bgColor: 'bg-pink-50',
-    textColor: 'text-pink-800'
+  {
+    id: 3,
+    name: "Silver Leaf Earrings",
+    artisanName: "Sophia's Jewels",
+    currentPrice: 45.00,
+    originalPrice: 50.00,
+    discountPercentage: 10,
+    rating: 4.7,
+    reviewCount: 56,
+    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&h=500&fit=crop",
+    category: "Jewelry",
+    subcategory: "Earrings",
+    tags: ["handmade", "silver", "leaf"],
+    stock: 25,
+    inStock: true,
+    fastDelivery: true,
+    isNew: true,
+    isBestSeller: false,
+    isFeatured: true,
+    materials: ["Silver", "Gemstone"],
+    shipping: {
+      isFreeShipping: false,
+      estimatedDays: 5,
+      locations: ["Worldwide"]
+    }
   },
-  { 
-    id: 'jewelry', 
-    name: 'Jewelry', 
-    count: 72, 
-    icon: '💎', 
-    color: 'from-blue-500 to-indigo-500',
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-800'
+  {
+    id: 4,
+    name: "Wool Blend Throw Blanket",
+    artisanName: "Cozy Knits",
+    currentPrice: 120.00,
+    rating: 4.6,
+    reviewCount: 42,
+    image: "https://images.unsplash.com/photo-1580309137424-8f1f3e20cc2d?w=500&h=500&fit=crop",
+    category: "Textiles",
+    subcategory: "Blankets",
+    tags: ["handmade", "wool", "blanket"],
+    stock: 5,
+    inStock: true,
+    fastDelivery: false,
+    isNew: false,
+    isBestSeller: false,
+    isFeatured: false,
+    materials: ["Wool", "Cotton"],
+    shipping: {
+      isFreeShipping: true,
+      estimatedDays: 6,
+      locations: ["Worldwide"]
+    }
   },
-  { 
-    id: 'glass', 
-    name: 'Glass Art', 
-    count: 28, 
-    icon: '🪞', 
-    color: 'from-cyan-500 to-teal-500',
-    bgColor: 'bg-cyan-50',
-    textColor: 'text-cyan-800'
+  {
+    id: 5,
+    name: "Stoneware Coffee Mug",
+    artisanName: "Elena Pottery",
+    currentPrice: 28.50,
+    rating: 4.8,
+    reviewCount: 103,
+    image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=500&h=500&fit=crop",
+    category: "Pottery",
+    subcategory: "Mugs",
+    tags: ["handmade", "ceramic", "mug"],
+    stock: 30,
+    inStock: true,
+    fastDelivery: true,
+    isNew: false,
+    isBestSeller: true,
+    isFeatured: false,
+    materials: ["Clay", "Glaze"],
+    shipping: {
+      isFreeShipping: true,
+      estimatedDays: 3,
+      locations: ["Worldwide"]
+    }
   },
-  { 
-    id: 'metal', 
-    name: 'Metalwork', 
-    count: 36, 
-    icon: '⚒️', 
-    color: 'from-gray-600 to-slate-600',
-    bgColor: 'bg-gray-100',
-    textColor: 'text-gray-800'
-  },
-  { 
-    id: 'leather', 
-    name: 'Leather', 
-    count: 34, 
-    icon: '🧰', 
-    color: 'from-yellow-600 to-amber-600',
-    bgColor: 'bg-amber-50',
-    textColor: 'text-amber-800'
-  },
+  {
+    id: 6,
+    name: "Leather Journal",
+    artisanName: "Bound Creations",
+    currentPrice: 35.00,
+    rating: 4.5,
+    reviewCount: 28,
+    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&h=500&fit=crop",
+    category: "Paper Crafts",
+    subcategory: "Journals",
+    tags: ["handmade", "leather", "journal"],
+    stock: 12,
+    inStock: true,
+    fastDelivery: true,
+    isNew: true,
+    isBestSeller: false,
+    isFeatured: false,
+    materials: ["Leather", "Paper"],
+    shipping: {
+      isFreeShipping: false,
+      estimatedDays: 4,
+      locations: ["Worldwide"]
+    }
+  }
 ];
 
-const materials: string[] = ['Clay', 'Wood', 'Metal', 'Glass', 'Fabric', 'Leather', 'Stone', 'Resin', 'Paper', 'Ceramic'];
-const locations: string[] = ['North America', 'Europe', 'Asia', 'Africa', 'South America'];
+// Available categories for filters
+const availableCategories = [
+  { id: "pottery", name: "Pottery", count: 48, icon: "🏺" },
+  { id: "woodwork", name: "Woodwork", count: 62, icon: "🪵" },
+  { id: "jewelry", name: "Jewelry", count: 72, icon: "💍" },
+  { id: "textiles", name: "Textiles", count: 45, icon: "🧵" },
+  { id: "paper", name: "Paper Crafts", count: 28, icon: "📜" }
+];
 
-const ITEMS_PER_PAGE = 12;
+const availableMaterials = ["Clay", "Wood", "Metal", "Glass", "Fabric", "Leather", "Stone", "Paper"];
+const availableLocations = ["North America", "Europe", "Asia", "Africa", "South America"];
 
-/* --------------------------- UI Helpers --------------------------- */
-function SoftCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div
-      className={[
-        'rounded-2xl border border-gray-200 bg-white shadow-sm',
-        'hover:shadow-md transition-shadow duration-200',
-        className,
-      ].join(' ')}
-    >
-      {children}
-    </div>
-  );
-}
-
-function HeroBanner({
-  totalCount,
-}: {
-  totalCount: number;
-}) {
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-secondary/90 min-h-[500px]">
-      {/* Background Image with Overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
-        }}
-      />
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/80 to-secondary/90 mix-blend-multiply" />
-      
-      {/* Pattern overlay */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundSize: '30px 30px'
-        }} />
-      </div>
-
-      {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl"></div>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
-        <Breadcrumbs 
-          items={[{ label: 'Marketplace', href: '/marketplace' }]} 
-          className="text-sm text-white/90" 
-          showHome={false} 
-        />
-
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-7">
-            <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2 mb-6">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Discover authentic handmade crafts
-            </Badge>
-
-            <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight">
-              Find Your Perfect <span className="text-yellow-300">Handcrafted</span> Treasure
-            </h1>
-
-            <p className="mt-4 text-xl text-white/90 max-w-2xl">
-              Explore unique creations from skilled artisans worldwide. Each piece tells a story of craftsmanship and passion.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center gap-4 text-lg">
-              <div className="inline-flex items-center gap-3 bg-white/10 px-4 py-2.5 rounded-xl backdrop-blur-sm">
-                <Clock className="w-5 h-5 text-white" />
-                <span className="text-white font-medium">Fast shipping</span>
-              </div>
-              <div className="inline-flex items-center gap-3 bg-emerald-500/30 px-4 py-2.5 rounded-xl backdrop-blur-sm">
-                <CheckCircle className="w-5 h-5 text-emerald-200" />
-                <span className="text-emerald-100 font-medium">Verified artisans</span>
-              </div>
-              <div className="inline-flex items-center gap-3 bg-blue-500/30 px-4 py-2.5 rounded-xl backdrop-blur-sm">
-                <TrendingUp className="w-5 h-5 text-blue-200" />
-                <span className="text-blue-100 font-medium">{totalCount} unique pieces</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right side stats */}
-          <div className="lg:col-span-5">
-            <SoftCard className="p-6 bg-white/10 backdrop-blur-lg border-white/20 text-white">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-lg bg-white/10">
-                  <Zap className="w-6 h-6 text-yellow-300" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">Marketplace Stats</h2>
-                  <p className="text-white/80 text-sm">Live updates from our artisan community</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                  <div className="text-3xl font-bold text-white">{totalCount}</div>
-                  <div className="text-sm text-white/80 mt-1">Active Listings</div>
-                </div>
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                  <div className="text-3xl font-bold text-white">250+</div>
-                  <div className="text-sm text-white/80 mt-1">Verified Artisans</div>
-                </div>
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                  <div className="text-3xl font-bold text-white">98%</div>
-                  <div className="text-sm text-white/80 mt-1">Satisfaction Rate</div>
-                </div>
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                  <div className="text-3xl font-bold text-white">24h</div>
-                  <div className="text-sm text-white/80 mt-1">Avg. Ship Time</div>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/80">New this week:</span>
-                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">+{Math.floor(totalCount * 0.1)} items</Badge>
-                </div>
-              </div>
-            </SoftCard>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CategoryChips({
-  activeFilters,
-  onToggleCategory,
-}: {
-  activeFilters: FilterState;
-  onToggleCategory: (id: string) => void;
-}) {
-  return (
-    <SoftCard className="p-6">
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Sparkles className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 text-lg">Shop by Category</h3>
-            <p className="text-sm text-gray-600">Browse our curated collections</p>
-          </div>
-        </div>
-        <span className="text-sm text-gray-500">Tap to filter</span>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
-        {categories.map((category) => {
-          const isActive = activeFilters.categories.includes(category.id);
-          return (
-            <button
-              key={category.id}
-              onClick={() => onToggleCategory(category.id)}
-              className={`
-                flex flex-col items-center p-4 rounded-xl transition-all duration-300
-                ${isActive 
-                  ? `bg-gradient-to-br ${category.color} text-white shadow-lg scale-[1.02] ring-2 ring-offset-2 ring-opacity-50` 
-                  : `${category.bgColor} hover:scale-[1.02] hover:shadow-md`
-                }
-                ${isActive ? 'ring-primary' : 'hover:ring-2 hover:ring-primary/20'}
-              `}
-            >
-              <span className="text-3xl mb-3">{category.icon}</span>
-              <span className={`font-semibold text-sm ${isActive ? 'text-white' : category.textColor}`}>
-                {category.name}
-              </span>
-              <span className={`text-xs mt-1 ${isActive ? 'text-white/80' : 'text-gray-600'}`}>
-                {category.count} items
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </SoftCard>
-  );
-}
-
-/* ----------------------------- Live Market Stats ----------------------------- */
-function useLiveStats() {
-  const [stats, setStats] = useState({
-    artisans: 250,
-    products: 5000,
-    countries: 50,
-    satisfaction: 98,
-    lastUpdated: new Date(),
+export default function MarketplaceContent() {
+  const searchParams = useSearchParams();
+  const [products] = useState<Product[]>(mockProducts);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
+  const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  
+  const [filters, setFilters] = useState<FilterState>({
+    categories: searchParams.get("category") ? [searchParams.get("category")!] : [],
+    priceRange: [0, 500],
+    minRating: null,
+    materials: [],
+    artisanLocations: [],
+    sortBy: "featured",
+    inStockOnly: false,
+    onSaleOnly: false,
+    search: searchParams.get("q") || "",
+    inStock: false,
+    fastDelivery: false
   });
 
-  const hasInitializedRef = useRef(false);
-
-  // Update stats function
-  const updateStats = useCallback(() => {
-    // Simulate real-time changes
-    const randomArtisans = Math.floor(250 + Math.random() * 50);
-    const randomProducts = Math.floor(5000 + Math.random() * 1000);
-    const randomCountries = Math.floor(50 + Math.random() * 10);
-    const randomSatisfaction = Math.min(100, Math.floor(98 + Math.random() * 3 - 1.5));
-    
-    setStats({
-      artisans: randomArtisans,
-      products: randomProducts,
-      countries: randomCountries,
-      satisfaction: randomSatisfaction,
-      lastUpdated: new Date(),
-    });
-  }, []);
-
-  // Initialize stats on mount (non-synchronously)
-  useEffect(() => {
-    if (!hasInitializedRef.current) {
-      const timer = setTimeout(() => {
-        updateStats();
-      }, 0);
-      hasInitializedRef.current = true;
-      
-      return () => clearTimeout(timer);
-    }
-  }, [updateStats]);
-
-  // Update stats every 24 hours
-  useEffect(() => {
-    const interval = setInterval(updateStats, 86400000); // 24 hours
-    return () => clearInterval(interval);
-  }, [updateStats]);
-
-  // Also update when page is active and it's been 24 hours
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        const hoursSinceUpdate = (Date.now() - stats.lastUpdated.getTime()) / (1000 * 60 * 60);
-        if (hoursSinceUpdate >= 24) {
-          // Schedule update on next tick to avoid synchronous setState
-          setTimeout(updateStats, 0);
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [stats.lastUpdated, updateStats]);
-
-  return stats;
-}
-
-function QuickStats() {
-  const stats = useLiveStats();
-  const [timeSinceUpdate, setTimeSinceUpdate] = useState('');
-
-  // Calculate time since last update
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const diffMs = now.getTime() - stats.lastUpdated.getTime();
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-      
-      if (diffHours > 0) {
-        setTimeSinceUpdate(`Updated ${diffHours}h ago`);
-      } else {
-        setTimeSinceUpdate(`Updated ${diffMinutes}m ago`);
-      }
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 60000); // Update every minute
-    return () => clearInterval(interval);
-  }, [stats.lastUpdated]);
-
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      <SoftCard className="p-5 hover:shadow-lg transition-shadow">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-orange-100">
-            <Award className="w-6 h-6 text-orange-600" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-gray-900">{stats.artisans}+</div>
-              <RefreshCw className="w-4 h-4 text-gray-400" />
-            </div>
-            <div className="text-sm text-gray-600 font-medium">Artisans</div>
-            <div className="text-xs text-gray-400 mt-1">Live updates</div>
-          </div>
-        </div>
-      </SoftCard>
-      <SoftCard className="p-5 hover:shadow-lg transition-shadow">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-blue-100">
-            <ShoppingBag className="w-6 h-6 text-blue-600" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-gray-900">{stats.products.toLocaleString()}+</div>
-              <TrendingUp className="w-4 h-4 text-green-500" />
-            </div>
-            <div className="text-sm text-gray-600 font-medium">Products</div>
-            <div className="text-xs text-gray-400 mt-1">Growing daily</div>
-          </div>
-        </div>
-      </SoftCard>
-      <SoftCard className="p-5 hover:shadow-lg transition-shadow">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-green-100">
-            <Truck className="w-6 h-6 text-green-600" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-gray-900">{stats.countries}+</div>
-              <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">+2 new</span>
-            </div>
-            <div className="text-sm text-gray-600 font-medium">Countries</div>
-            <div className="text-xs text-gray-400 mt-1">Worldwide reach</div>
-          </div>
-        </div>
-      </SoftCard>
-      <SoftCard className="p-5 hover:shadow-lg transition-shadow">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-purple-100">
-            <Shield className="w-6 h-6 text-purple-600" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-gray-900">{stats.satisfaction}%</div>
-              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-            </div>
-            <div className="text-sm text-gray-600 font-medium">Satisfaction</div>
-            <div className="text-xs text-gray-400 mt-1">{timeSinceUpdate}</div>
-          </div>
-        </div>
-      </SoftCard>
-    </div>
-  );
-}
-
-/* ----------------------------- Page ----------------------------- */
-export default function MarketplacePage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
-
-  // Debounce search query to avoid too many re-renders
+  // Apply filters and sorting
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
+      let filtered = [...products];
+
+      // Apply category filter
+      if (filters.categories.length > 0) {
+        filtered = filtered.filter(p => 
+          filters.categories.some(cat => 
+            p.category.toLowerCase().includes(cat.toLowerCase())
+          )
+        );
+      }
+
+      // Apply price range filter
+      filtered = filtered.filter(p => 
+        p.currentPrice >= filters.priceRange[0] && p.currentPrice <= filters.priceRange[1]
+      );
+
+      // Apply rating filter
+      if (filters.minRating) {
+        filtered = filtered.filter(p => p.rating >= filters.minRating!);
+      }
+
+      // Apply materials filter
+      if (filters.materials.length > 0) {
+        filtered = filtered.filter(p => 
+          p.materials?.some(m => filters.materials.includes(m))
+        );
+      }
+
+      // Apply stock filter
+      if (filters.inStockOnly) {
+        filtered = filtered.filter(p => p.stock > 0);
+      }
+
+      // Apply sale filter
+      if (filters.onSaleOnly) {
+        filtered = filtered.filter(p => (p.discountPercentage || 0) > 0);
+      }
+
+      // Apply search filter
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        filtered = filtered.filter(p => 
+          p.name.toLowerCase().includes(searchLower) ||
+          p.artisanName.toLowerCase().includes(searchLower) ||
+          p.category.toLowerCase().includes(searchLower) ||
+          p.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+        );
+      }
+
+      // Apply sorting
+      switch (filters.sortBy) {
+        case "price-low":
+          filtered.sort((a, b) => a.currentPrice - b.currentPrice);
+          break;
+        case "price-high":
+          filtered.sort((a, b) => b.currentPrice - a.currentPrice);
+          break;
+        case "rating":
+          filtered.sort((a, b) => b.rating - a.rating);
+          break;
+        case "newest":
+          filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+          break;
+        case "bestsellers":
+          filtered.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
+          break;
+        default:
+          // featured - keep original order
+          filtered.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+          break;
+      }
+
+      setFilteredProducts(filtered);
+      setIsLoading(false);
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [filters, products]);
 
-  const urlFilters: FilterState = useMemo(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    return {
-      categories: params.get('categories')?.split(',').filter(Boolean) || [],
-      priceRange: [
-        parseInt(params.get('minPrice') || '0', 10),
-        parseInt(params.get('maxPrice') || '1000', 10),
-      ] as [number, number],
-      minRating: params.get('minRating') ? parseFloat(params.get('minRating')!) : null,
-      materials: params.get('materials')?.split(',').filter(Boolean) || [],
-      artisanLocations: params.get('locations')?.split(',').filter(Boolean) || [],
-      sortBy: (params.get('sortBy') as FilterState['sortBy']) || 'featured',
-      inStockOnly: params.get('inStock') === 'true',
-      onSaleOnly: params.get('onSale') === 'true',
-    };
-  }, [searchParams]);
+  const handleFilterChange = (newFilters: FilterState) => {
+    setIsLoading(true);
+    setFilters(newFilters);
+  };
 
-  const [activeFilters, setActiveFilters] = useState<FilterState>(urlFilters);
-  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const handleSortChange = (sortBy: SortOption) => {
+    setIsLoading(true);
+    setFilters(prev => ({ ...prev, sortBy: adaptSortOption(sortBy) }));
+  };
 
-  // Search function that properly filters products
-  const searchProducts = useCallback((products: Product[], query: string) => {
-    if (!query.trim()) return products;
-    
-    const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
-    
-    return products.filter(product => {
-      const searchableText = `
-        ${product.name.toLowerCase()}
-        ${product.category.toLowerCase()}
-        ${product.subcategory.toLowerCase()}
-        ${product.description.toLowerCase()}
-        ${product.artisanName.toLowerCase()}
-        ${product.materials.join(' ').toLowerCase()}
-        ${product.tags.join(' ').toLowerCase()}
-      `;
-      
-      return searchTerms.every(term => searchableText.includes(term));
-    });
-  }, []);
+  const handleAddToCart = (product: Product) => {
+    console.log("Add to cart:", product);
+    // Implement actual add to cart functionality here
+  };
 
-  const filteredProducts = useMemo(() => {
-    let filtered = [...mockProducts];
+  const handleQuickView = (product: Product) => {
+    console.log("Quick view:", product);
+    // Implement quick view functionality here
+  };
 
-    // Apply search filter first
-    if (debouncedSearchQuery.trim()) {
-      filtered = searchProducts(filtered, debouncedSearchQuery);
-    }
+  const handleAddToWishlist = (product: Product) => {
+    console.log("Add to wishlist:", product);
+    // Implement wishlist functionality here
+  };
 
-    // Apply other filters
-    if (activeFilters.categories.length > 0) {
-      filtered = filtered.filter((p) => 
-        activeFilters.categories.includes(p.category.toLowerCase())
-      );
-    }
-
-    filtered = filtered.filter(
-      (p) => p.currentPrice >= activeFilters.priceRange[0] && p.currentPrice <= activeFilters.priceRange[1]
-    );
-
-    if (activeFilters.minRating) {
-      filtered = filtered.filter((p) => p.rating >= activeFilters.minRating!);
-    }
-
-    if (activeFilters.materials.length > 0) {
-      filtered = filtered.filter((p) => 
-        activeFilters.materials.some((m) => p.materials.includes(m))
-      );
-    }
-
-    if (activeFilters.inStockOnly) filtered = filtered.filter((p) => p.stock > 0);
-    if (activeFilters.onSaleOnly) filtered = filtered.filter((p) => p.discountPercentage > 0);
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (activeFilters.sortBy) {
-        case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'price-low':
-          return a.currentPrice - b.currentPrice;
-        case 'price-high':
-          return b.currentPrice - a.currentPrice;
-        case 'rating':
-          return b.rating - a.rating;
-        case 'bestsellers':
-          return (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0);
-        case 'featured':
-        default:
-          return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
-      }
-    });
-
-    return filtered;
-  }, [activeFilters, debouncedSearchQuery, searchProducts]);
-
-  // Separate useEffect for loading state - FIXED: Use setTimeout to avoid synchronous setState
-  useEffect(() => {
-    if (filteredProducts.length > 0) {
-      // Use setTimeout to schedule the state update on the next tick
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 0);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [filteredProducts]);
-
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-
-  const activeFilterCount = [
-    activeFilters.categories.length,
-    activeFilters.minRating ? 1 : 0,
-    activeFilters.materials.length,
-    activeFilters.artisanLocations.length,
-    activeFilters.priceRange[0] > 0 || activeFilters.priceRange[1] < 1000 ? 1 : 0,
-    activeFilters.inStockOnly ? 1 : 0,
-    activeFilters.onSaleOnly ? 1 : 0,
-  ].reduce((a, b) => a + b, 0);
-
-  const updateUrlParams = useCallback((filters: FilterState, page: number) => {
-    const params = new URLSearchParams();
-
-    if (filters.categories.length > 0) {
-      params.set('categories', filters.categories.join(','));
-    }
-    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000) {
-      params.set('minPrice', filters.priceRange[0].toString());
-      params.set('maxPrice', filters.priceRange[1].toString());
-    }
-    if (filters.minRating) {
-      params.set('minRating', filters.minRating.toString());
-    }
-    if (filters.materials.length > 0) {
-      params.set('materials', filters.materials.join(','));
-    }
-    if (filters.artisanLocations.length > 0) {
-      params.set('locations', filters.artisanLocations.join(','));
-    }
-    if (filters.sortBy !== 'featured') {
-      params.set('sortBy', filters.sortBy);
-    }
-    if (filters.inStockOnly) {
-      params.set('inStock', 'true');
-    }
-    if (filters.onSaleOnly) {
-      params.set('onSale', 'true');
-    }
-    if (page > 1) {
-      params.set('page', page.toString());
-    }
-
-    const qs = params.toString();
-    router.push(`/marketplace${qs ? `?${qs}` : ''}`, { scroll: false });
-  }, [router]);
-
-  const handleFilterChange = useCallback((filters: FilterState) => {
-    setActiveFilters(filters);
-    // Use setTimeout to avoid synchronous setState
-    setTimeout(() => setIsLoading(true), 0);
-    updateUrlParams(filters, 1);
-  }, [updateUrlParams]);
-
-  const handleSortChange = useCallback((sortBy: SortOption) => {
-    const next = { ...activeFilters, sortBy: sortBy as FilterState['sortBy'] };
-    setActiveFilters(next);
-    // Use setTimeout to avoid synchronous setState
-    setTimeout(() => setIsLoading(true), 0);
-    updateUrlParams(next, currentPage);
-  }, [activeFilters, currentPage, updateUrlParams]);
-
-  const handlePageChange = useCallback((page: number) => {
-    updateUrlParams(activeFilters, page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activeFilters, updateUrlParams]);
-
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    // Use setTimeout to avoid synchronous setState
-    setTimeout(() => setIsLoading(true), 0);
-    // Reset to page 1 when searching
-    updateUrlParams(activeFilters, 1);
-  }, [activeFilters, updateUrlParams]);
-
-  const clearAll = useCallback(() => {
-    const defaultFilters = {
+  const clearFilters = () => {
+    setIsLoading(true);
+    setFilters({
       categories: [],
-      priceRange: [0, 1000] as [number, number],
+      priceRange: [0, 500],
       minRating: null,
       materials: [],
       artisanLocations: [],
-      sortBy: 'featured' as const,
+      sortBy: "featured",
       inStockOnly: false,
       onSaleOnly: false,
-    };
-    setSearchQuery('');
-    // Use setTimeout to avoid synchronous setState
-    setTimeout(() => setIsLoading(true), 0);
-    handleFilterChange(defaultFilters);
-  }, [handleFilterChange]);
-
-  const toggleCategory = useCallback((id: string) => {
-    const isActive = activeFilters.categories.includes(id);
-    const next = {
-      ...activeFilters,
-      categories: isActive 
-        ? activeFilters.categories.filter((c) => c !== id) 
-        : [...activeFilters.categories, id],
-    };
-    handleFilterChange(next);
-  }, [activeFilters, handleFilterChange]);
-
-  const handleAddToCart = useCallback((product: Product) => {
-    console.log('Adding to cart:', product);
-    // Implement add to cart functionality
-  }, []);
-
-  const handleQuickView = useCallback((product: Product) => {
-    console.log('Quick view:', product);
-    // Implement quick view functionality
-  }, []);
-
-  const handleAddToWishlist = useCallback((product: Product) => {
-    console.log('Adding to wishlist:', product);
-    // Implement wishlist functionality
-  }, []);
+      search: "",
+      inStock: false,
+      fastDelivery: false
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
-      {/* Hero Banner with Image */}
-      <HeroBanner totalCount={filteredProducts.length} />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* ALWAYS VISIBLE SEARCH BAR */}
-        <div className="mb-8">
-          <SoftCard className="p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  What are you looking for?
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  Search for handmade products, artisans, or materials
-                </p>
-                <div className="relative max-w-2xl">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    placeholder="Search for pottery, jewelry, textiles, wooden items, leather goods..."
-                    className="w-full pl-12 pr-12 py-4 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-lg"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => handleSearch('')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full"
-                    >
-                      <X className="w-5 h-5 text-gray-400" />
-                    </button>
-                  )}
-                </div>
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="text-sm text-gray-500">Popular:</span>
-                  <button onClick={() => handleSearch('pottery')} className="text-sm px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
-                    Pottery
-                  </button>
-                  <button onClick={() => handleSearch('jewelry')} className="text-sm px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
-                    Jewelry
-                  </button>
-                  <button onClick={() => handleSearch('wood')} className="text-sm px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
-                    Wooden Items
-                  </button>
-                  <button onClick={() => handleSearch('leather')} className="text-sm px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
-                    Leather Goods
-                  </button>
-                </div>
-              </div>
-            </div>
-          </SoftCard>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section with Background Image */}
+      <div className="relative h-80 bg-gradient-to-r from-primary/90 to-secondary/90">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url("https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=1200&h=400&fit=crop")',
+            mixBlendMode: "overlay"
+          }}
+        />
+        <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center text-white">
+          <h1 className="text-5xl font-bold mb-4">Handcrafted Marketplace</h1>
+          <p className="text-xl max-w-2xl">
+            Discover unique handmade items from talented artisans around the world
+          </p>
         </div>
+      </div>
 
-        {/* Live Quick Stats */}
-        <QuickStats />
+      <div className="container mx-auto px-4 py-8">
+        {/* Collection Spotlight */}
+        <CollectionSpotlight />
 
-        {/* Category Chips */}
-        <CategoryChips activeFilters={activeFilters} onToggleCategory={toggleCategory} />
+        {/* Main Content */}
+        <div className="flex flex-col lg:flex-row gap-8 mt-12">
+          {/* Filters Sidebar - Desktop */}
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <div className="sticky top-24">
+              <ProductFilters 
+                onFilterChange={handleFilterChange}
+                initialFilters={filters}
+                availableCategories={availableCategories}
+                availableMaterials={availableMaterials}
+                availableLocations={availableLocations}
+              />
 
-        <div className="mt-8 flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <aside className="hidden lg:block w-80 flex-shrink-0">
-            <div className="sticky top-24 space-y-6">
-              <SoftCard className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Filter className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-gray-900">Refine Results</h2>
-                      <p className="text-sm text-gray-600">Filter by your preferences</p>
-                    </div>
-                  </div>
-                  {activeFilterCount > 0 && (
-                    <Badge className="bg-primary text-white font-medium px-3 py-1">
-                      {activeFilterCount} active
-                    </Badge>
-                  )}
+              {/* Clear All Filters Button */}
+              {Object.values(filters).some(v => v && v !== false && (Array.isArray(v) ? v.length > 0 : true)) && (
+                <div className='mt-4 pt-4 border-t border-gray-200'>
+                  <Button 
+                    variant='outline' 
+                    onClick={clearFilters} 
+                    className='w-full text-sm hover:bg-red-50 hover:text-red-600 hover:border-red-300'
+                  >
+                    Clear All Filters
+                  </Button>
                 </div>
-
-                <ProductFilters
-                  onFilterChange={handleFilterChange}
-                  initialFilters={activeFilters}
-                  availableCategories={categories}
-                  availableMaterials={materials}
-                  availableLocations={locations}
-                />
-
-                {activeFilterCount > 0 && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <Button 
-                      variant="outline" 
-                      onClick={clearAll} 
-                      className="w-full gap-2 hover:bg-gray-50 hover:border-gray-300"
-                    >
-                      <X className="w-4 h-4" />
-                      Clear All Filters
-                    </Button>
-                  </div>
-                )}
-              </SoftCard>
-
-              {/* Featured Artisans Sidebar */}
-              <SoftCard className="p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-yellow-100">
-                    <Star className="w-5 h-5 text-yellow-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900">Featured Artisans</h3>
-                </div>
-                <FeaturedArtisans artisans={[]} />
-              </SoftCard>
+              )}
             </div>
           </aside>
 
-          {/* Main Results */}
+          {/* Mobile Filter Button */}
+          <div className="lg:hidden flex items-center justify-between mb-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsMobileFilterOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+              {Object.values(filters).filter(v => v && v !== false && (Array.isArray(v) ? v.length > 0 : true)).length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {Object.values(filters).filter(v => v && v !== false && (Array.isArray(v) ? v.length > 0 : true)).length}
+                </Badge>
+              )}
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "ghost"}
+                size="icon"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid3x3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "ghost"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+              >
+                <LayoutList className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Products Grid */}
           <main className="flex-1">
-            {/* Results Header */}
-            <SoftCard className="p-6 mb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <TrendingUp className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">Products</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Showing {filteredProducts.length} items
-                        {activeFilterCount > 0 && ` • ${activeFilterCount} active filters`}
-                        {searchQuery && ` • Search: "${searchQuery}"`}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {/* Sort Dropdown */}
-                  <SortDropdown 
-                    value={activeFilters.sortBy} 
-                    onChange={handleSortChange} 
-                  />
-
-                  {/* Mobile Filters Button */}
+            {/* Results Info */}
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-gray-600">
+                Showing <span className="font-semibold">{filteredProducts.length}</span> products
+              </p>
+              <div className="hidden lg:flex items-center gap-4">
+                <SortDropdown 
+                  value={filters.sortBy}
+                  onChange={handleSortChange}
+                />
+                <div className="flex items-center gap-2">
                   <Button
-                    variant="outline"
-                    onClick={() => setShowMobileFilters(true)}
-                    className="lg:hidden flex items-center gap-2 border-gray-300"
+                    variant={viewMode === "grid" ? "default" : "ghost"}
+                    size="icon"
+                    onClick={() => setViewMode("grid")}
                   >
-                    <SlidersHorizontal className="w-4 h-4" />
-                    Filters
-                    {activeFilterCount > 0 && (
-                      <Badge className="ml-1 bg-primary text-white">
-                        {activeFilterCount}
-                      </Badge>
-                    )}
+                    <Grid3x3 className="h-4 w-4" />
                   </Button>
-
-                  {/* Clear Button */}
-                  {activeFilterCount > 0 && (
-                    <Button 
-                      variant="outline" 
-                      onClick={clearAll} 
-                      className="hidden sm:inline-flex gap-2 border-gray-300 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                      Clear All
-                    </Button>
-                  )}
+                  <Button
+                    variant={viewMode === "list" ? "default" : "ghost"}
+                    size="icon"
+                    onClick={() => setViewMode("list")}
+                  >
+                    <LayoutList className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-            </SoftCard>
-
-            {/* Active Filters Display */}
-            {activeFilterCount > 0 && (
-              <SoftCard className="p-5 mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-primary" />
-                    <span className="font-medium text-gray-900">Active Filters:</span>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={clearAll}
-                    className="text-gray-600 hover:text-red-600 hover:bg-red-50"
-                  >
-                    <X className="w-3 h-3 mr-1" />
-                    Clear All
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {activeFilters.categories.map((category) => {
-                    const cat = categories.find(c => c.id === category);
-                    return (
-                      <Badge 
-                        key={category} 
-                        variant="secondary" 
-                        className="gap-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
-                      >
-                        <span className="text-lg">{cat?.icon}</span>
-                        {cat?.name}
-                        <button
-                          onClick={() => {
-                            const newFilters = {
-                              ...activeFilters,
-                              categories: activeFilters.categories.filter(c => c !== category)
-                            };
-                            handleFilterChange(newFilters);
-                          }}
-                          className="ml-1 hover:text-red-600 p-0.5 rounded-full hover:bg-red-100"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    );
-                  })}
-                </div>
-              </SoftCard>
-            )}
+            </div>
 
             {/* Products Grid */}
-            <ProductGrid
-              products={paginatedProducts}
+            <ProductGrid 
+              products={filteredProducts} 
               loading={isLoading}
-              emptyMessage={
-                <div className="text-center py-16">
-                  <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                    <Search className="w-12 h-12 text-primary" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    {searchQuery ? `No results for "${searchQuery}"` : "No products found"}
-                  </h3>
-                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                    {searchQuery 
-                      ? "Try different search terms or browse our categories."
-                      : "Try adjusting your filters or browse different categories."
-                    }
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button onClick={clearAll} className="gap-2 bg-primary hover:bg-primary/90">
-                      <Sparkles className="w-4 h-4" />
-                      Clear All Filters
-                    </Button>
-                    {searchQuery && (
-                      <Button 
-                        variant="outline" 
-                        onClick={() => handleSearch('')}
-                        className="gap-2 border-gray-300"
-                      >
-                        <X className="w-4 h-4" />
-                        Clear Search
-                      </Button>
-                    )}
-                    <Button 
-                      variant="outline"
-                      onClick={() => handleFilterChange({
-                        categories: [],
-                        priceRange: [0, 1000],
-                        minRating: null,
-                        materials: [],
-                        artisanLocations: [],
-                        sortBy: 'featured',
-                        inStockOnly: false,
-                        onSaleOnly: false,
-                      })}
-                      className="gap-2 border-gray-300"
-                    >
-                      <Filter className="w-4 h-4" />
-                      Reset Filters
-                    </Button>
-                  </div>
-                </div>
-              }
               onAddToCart={handleAddToCart}
               onQuickView={handleQuickView}
               onAddToWishlist={handleAddToWishlist}
             />
 
-            {/* Pagination */}
-            {filteredProducts.length > 0 && totalPages > 1 && (
-              <div className="mt-10">
-                <SoftCard className="p-6">
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={filteredProducts.length}
-                    itemsPerPage={ITEMS_PER_PAGE}
-                    onPageChange={handlePageChange}
-                  />
-                </SoftCard>
-              </div>
-            )}
-
-            {/* Collection Spotlight */}
+            {/* Featured Artisans */}
             <div className="mt-16">
-              <CollectionSpotlight />
-            </div>
-
-            {/* Mobile Featured Artisans */}
-            <div className="lg:hidden mt-16">
-              <SoftCard className="p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-yellow-100">
-                    <Star className="w-5 h-5 text-yellow-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900">Featured Artisans</h3>
-                </div>
-                <FeaturedArtisans artisans={[]} />
-              </SoftCard>
+              <FeaturedArtisans />
             </div>
           </main>
         </div>
       </div>
 
       {/* Mobile Filters Modal */}
-      {showMobileFilters && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden"
-            onClick={() => setShowMobileFilters(false)}
-          />
-          <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white z-50 overflow-y-auto lg:hidden shadow-2xl">
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                    <Filter className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">Filters</h2>
-                    <p className="text-sm text-gray-600">Refine your search</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowMobileFilters(false)}
-                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-                  aria-label="Close filters"
-                >
-                  <X className="h-6 w-6 text-gray-600" />
-                </button>
-              </div>
+      {isMobileFilterOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileFilterOpen(false)} />
+          <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-xl overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Filters</h2>
+              <Button variant="ghost" size="icon" onClick={() => setIsMobileFilterOpen(false)}>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
             </div>
-
-            <div className="p-6">
-              <ProductFilters
-                onFilterChange={(filters: FilterState) => {
-                  handleFilterChange(filters);
-                  setShowMobileFilters(false);
+            <div className="p-4">
+              <ProductFilters 
+                onFilterChange={(newFilters) => {
+                  handleFilterChange(newFilters);
+                  setIsMobileFilterOpen(false);
                 }}
-                initialFilters={activeFilters}
-                availableCategories={categories}
-                availableMaterials={materials}
-                availableLocations={locations}
+                initialFilters={filters}
+                availableCategories={availableCategories}
+                availableMaterials={availableMaterials}
+                availableLocations={availableLocations}
                 mobile={true}
               />
-
-              <div className="sticky bottom-0 bg-white pt-6 mt-6 border-t border-gray-200">
-                <div className="grid grid-cols-2 gap-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={clearAll} 
-                    className="gap-2 border-gray-300 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-                  >
-                    <X className="w-4 h-4" />
-                    Clear All
-                  </Button>
-                  <Button 
-                    onClick={() => setShowMobileFilters(false)}
-                    className="gap-2 bg-primary hover:bg-primary/90"
-                  >
-                    Apply Filters
-                  </Button>
-                </div>
-              </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

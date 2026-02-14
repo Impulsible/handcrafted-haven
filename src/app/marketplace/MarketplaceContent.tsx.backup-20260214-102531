@@ -4,18 +4,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-
-// Helper function to safely get date
-const safeDate = (dateString: string | undefined): Date => {
-  return dateString ? new Date(dateString) : new Date();
-};
-
-// Helper function to safely format date
-const safeFormatDate = (dateString: string | undefined): string => {
-  return dateString 
-    ? formatDistanceToNow(new Date(dateString), { addSuffix: true })
-    : 'Recently added';
-};import {
+import {
   CheckCircle,
   Clock,
   Filter,
@@ -591,10 +580,10 @@ export default function MarketplacePage() {
       const searchableText = `
         ${product.name.toLowerCase()}
         ${product.category.toLowerCase()}
-        ${product.subcategory ?? "".toLowerCase()}
-        ${product.description ?? "".toLowerCase()}
+        ${product.subcategory.toLowerCase()}
+        ${product.description.toLowerCase()}
         ${product.artisanName.toLowerCase()}
-        ${product.materials ?? [].join(' ').toLowerCase()}
+        ${product.materials.join(' ').toLowerCase()}
         ${product.tags.join(' ').toLowerCase()}
       `;
       
@@ -627,12 +616,12 @@ export default function MarketplacePage() {
 
     if (activeFilters.materials.length > 0) {
       filtered = filtered.filter((p) => 
-        activeFilters.materials.some((m) => p.materials ?? [].includes(m))
+        activeFilters.materials.some((m) => p.materials.includes(m))
       );
     }
 
     if (activeFilters.inStockOnly) filtered = filtered.filter((p) => p.stock > 0);
-    if (activeFilters.onSaleOnly) filtered = filtered.filter((p) => p.discountPercentage ?? 0 > 0);
+    if (activeFilters.onSaleOnly) filtered = filtered.filter((p) => p.discountPercentage > 0);
 
     // Apply sorting
     filtered.sort((a, b) => {
@@ -1174,10 +1163,5 @@ export default function MarketplacePage() {
       )}
     </div>
   );
-}
-
-
-function formatDistanceToNow(arg0: Date, arg1: { addSuffix: boolean; }): string {
-  throw new Error('Function not implemented.');
 }
 
