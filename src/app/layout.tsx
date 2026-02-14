@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+﻿﻿import type { Metadata } from "next";
 import { Open_Sans, Playfair_Display, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";

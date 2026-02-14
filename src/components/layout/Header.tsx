@@ -1,4 +1,4 @@
-﻿﻿"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -277,7 +277,7 @@ export default function Header() {
                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                   <ShoppingBag className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="text-2xl font-bold text-primary group-hover:text-primary/90 transition-colors tracking-tight whitespace-nowrap">
+                <span className="text-2xl font-bold text-primary group-hover:text-primary/90 transition-colors tracking-tight whitespace-nowrap font-dancing">
                   Handcrafted Haven
                 </span>
               </Link>
@@ -682,7 +682,7 @@ export default function Header() {
                     <ShoppingBag className="h-6.5 w-6.5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-primary tracking-tight">
+                    <h2 className="text-xl font-bold text-primary tracking-tight font-dancing">
                       Handcrafted Haven
                     </h2>
                     <div className="flex items-center gap-2 mt-1">

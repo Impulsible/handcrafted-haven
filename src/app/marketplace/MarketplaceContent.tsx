@@ -1,4 +1,5 @@
-﻿// Update the imports in marketplace/page.tsx:
+﻿/* eslint-disable @typescript-eslint/no-unused-vars */
+// Update the imports in marketplace/page.tsx:
 "use client";
 
 

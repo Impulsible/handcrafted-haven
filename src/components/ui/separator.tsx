@@ -1,15 +1,29 @@
 import * as React from "react"
 
-const Separator = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`shrink-0 bg-gray-200 h-[1px] w-full ${className || ''}`}
-    {...props}
-  />
-))
+import { cn } from "@/lib/utils"
+
+type SeparatorProps = {
+  className?: string
+  orientation?: "horizontal" | "vertical"
+  decorative?: boolean
+}
+
+const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
+  ({ className, orientation = "horizontal", decorative = true }, ref) => {
+    return (
+      <div
+        ref={ref}
+        role={decorative ? "none" : "separator"}
+        aria-orientation={decorative ? undefined : orientation}
+        className={cn(
+          "shrink-0 bg-border",
+          orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
+          className
+        )}
+      />
+    )
+  }
+)
 Separator.displayName = "Separator"
 
 export { Separator }
