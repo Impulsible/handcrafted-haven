@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -35,13 +35,13 @@ import CartIcon from "@/components/cart/CartIcon";
 
 // Promo messages
 const promoMessages = [
-  { id: 1, text: "✨ Free Shipping on Orders Over $50", type: "shipping" },
-  { id: 2, text: "🎨 New Artisan Collection Just Dropped", type: "new" },
-  { id: 3, text: "🌟 Artisan Spotlight: Meet Our Featured Creator", type: "spotlight" },
-  { id: 4, text: "⚡ Flash Sale: 24 Hours Only - 30% Off Textiles", type: "sale" },
-  { id: 5, text: "🎭 Upcoming Workshop: Pottery Basics This Saturday", type: "event" },
-  { id: 6, text: "🍀 Spring Collection - Fresh Designs for the Season", type: "seasonal" },
-  { id: 7, text: "🌱 Sustainable Crafting Month - Eco-friendly Products", type: "sustainable" }
+  { id: 1, text: "Ã¢Å“Â¨ Free Shipping on Orders Over $50", type: "shipping" },
+  { id: 2, text: "Ã°Å¸Å½Â¨ New Artisan Collection Just Dropped", type: "new" },
+  { id: 3, text: "Ã°Å¸Å’Å¸ Artisan Spotlight: Meet Our Featured Creator", type: "spotlight" },
+  { id: 4, text: "Ã¢Å¡Â¡ Flash Sale: 24 Hours Only - 30% Off Textiles", type: "sale" },
+  { id: 5, text: "Ã°Å¸Å½Â­ Upcoming Workshop: Pottery Basics This Saturday", type: "event" },
+  { id: 6, text: "Ã°Å¸â€™Â Valentine's Collection - Limited Edition Pieces", type: "seasonal" },
+  { id: 7, text: "Ã°Å¸Å’Â± Sustainable Crafting Month - Eco-friendly Products", type: "sustainable" }
 ];
 
 const APP_VERSION = "v2.1.4";

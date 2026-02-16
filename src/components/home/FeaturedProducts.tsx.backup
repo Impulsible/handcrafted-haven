@@ -157,7 +157,7 @@ export default function FeaturedProducts() {
         <div className="text-center mt-16">
           <Link href="/marketplace"><Button size="lg" variant="outline" className="border-primary text-primary px-8">View All 200+ Products</Button></Link>
           <p className="mt-4 text-text/60 text-sm">
-            Free shipping on orders over $100 ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ 30-day return policy
+            Free shipping on orders over $100 Ã¢â‚¬Â¢ 30-day return policy
           </p>
         </div>
       </div>

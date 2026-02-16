@@ -1,6 +1,5 @@
-import ProductCard from '../../../components/product/ProductCard'
-import Link from 'next/link';
-import { Award, Shield, Truck, Users } from 'lucide-react';
+import ProductCard from '@/components/product/ProductCard'
+import { Award, Shield, Truck, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const products = [
@@ -17,7 +16,7 @@ const products = [
     artisan: "Elena Rodriguez",
     artisanSince: "2010",
     artisanImage: "/images/artisans/elena.jpg",
-    tags: ["Handmade", "Eco-friendly", "Microwave Safe", "Dishwasher Safe"],
+    tags: ["Handmade", "Eco-friendly", "Microwave Safe", "Dishwasher Safe"],    
     inStock: true,
     bestSeller: true,
     discount: 22,
@@ -35,7 +34,7 @@ const products = [
     artisan: "James Wilson",
     artisanSince: "2008",
     artisanImage: "/images/artisans/james.jpg",
-    tags: ["Solid Walnut", "Hand Carved", "Heirloom Quality", "Sustainable"],
+    tags: ["Solid Walnut", "Hand Carved", "Heirloom Quality", "Sustainable"],   
     inStock: true,
     bestSeller: true,
     discount: 11,
@@ -53,7 +52,7 @@ const products = [
     artisan: "Sophia Chen",
     artisanSince: "2015",
     artisanImage: "/images/artisans/sophia.jpg",
-    tags: ["Sterling Silver", "Natural Turquoise", "Adjustable", "Gift Box"],
+    tags: ["Sterling Silver", "Natural Turquoise", "Adjustable", "Gift Box"],   
     inStock: true,
     bestSeller: false,
     discount: 16,
@@ -80,7 +79,7 @@ const products = [
     id: 5,
     name: "Professional End-Grain Cutting Board",
     category: "Woodwork",
-    description: "Professional end-grain oak cutting board with juice groove.",
+    description: "Professional end-grain oak cutting board with juice groove.", 
     price: 125.00,
     originalPrice: 150.00,
     rating: 4.8,
@@ -107,7 +106,7 @@ const products = [
     artisan: "Sophia Chen",
     artisanSince: "2015",
     artisanImage: "/images/artisans/sophia.jpg",
-    tags: ["14K Gold", "Freshwater Pearls", "Hypoallergenic", "Elegant Box"],
+    tags: ["14K Gold", "Freshwater Pearls", "Hypoallergenic", "Elegant Box"],   
     inStock: true,
     bestSeller: true,
     discount: 17,
@@ -124,30 +123,29 @@ export default function FeaturedProducts() {
             <Award className="w-4 h-4 text-primary mr-2" />
             <span className="text-sm font-semibold text-primary">CURATED COLLECTION</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4">
-            Featured <span className="text-gradient">Artisan Masterpieces</span>
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4">     
+            Featured <span className="text-gradient">Artisan Masterpieces</span>          </h2>
           <p className="text-lg text-text/70 max-w-2xl mx-auto mb-8">
-            Discover our handpicked selection of exceptional craftsmanship
+            Discover our handpicked selection of exceptional craftsmanship      
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-8">
             <div className="flex items-center px-4 py-2 bg-primary/5 rounded-full">
               <Shield className="w-4 h-4 text-primary mr-2" />
-              <span className="text-sm font-medium">Quality Guarantee</span>
+              <span className="text-sm font-medium">Quality Guarantee</span>    
             </div>
             <div className="flex items-center px-4 py-2 bg-primary/5 rounded-full">
               <Truck className="w-4 h-4 text-primary mr-2" />
-              <span className="text-sm font-medium">Secure Shipping</span>
+              <span className="text-sm font-medium">Secure Shipping</span>      
             </div>
             <div className="flex items-center px-4 py-2 bg-primary/5 rounded-full">
               <Users className="w-4 h-4 text-primary mr-2" />
-              <span className="text-sm font-medium">Artisan Direct</span>
+              <span className="text-sm font-medium">Artisan Direct</span>       
             </div>
           </div>
         </div>
 
-        {/* Products Grid - Using ProductCard */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Products Grid - NOW USING PRODUCT CARD */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">  
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -155,13 +153,14 @@ export default function FeaturedProducts() {
 
         {/* View All Button */}
         <div className="text-center mt-16">
-          <Link href="/marketplace"><Button size="lg" variant="outline" className="border-primary text-primary px-8">View All 200+ Products</Button></Link>
+          <Button size="lg" variant="outline" className="border-primary text-primary px-8">
+            View All 200+ Products
+          </Button>
           <p className="mt-4 text-text/60 text-sm">
-            Free shipping on orders over $100 ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ 30-day return policy
+            Free shipping on orders over $100 � 30-day return policy
           </p>
         </div>
       </div>
     </section>
   );
 }
-

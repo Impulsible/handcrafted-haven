@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -28,59 +28,19 @@ import {
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/product/ProductCard";
 import { products, categories } from "@/data/products";
-import { useCart } from "@/contexts/CartContext";
-import { toast } from "sonner";
 
-// Live Market Stats Component with Persistence
+// Live Market Stats Component - Updates every 60 minutes
 const MarketStats = () => {
-  // Initialize stats from localStorage or with default values
-  const [stats, setStats] = useState(() => {
-    // Try to load from localStorage
-    if (typeof window !== 'undefined') {
-      const savedStats = localStorage.getItem('marketStats');
-      if (savedStats) {
-        try {
-          const parsed = JSON.parse(savedStats);
-          // Convert lastUpdated string back to Date object
-          return {
-            ...parsed,
-            lastUpdated: new Date(parsed.lastUpdated)
-          };
-        } catch (e) {
-          console.error('Failed to parse saved stats', e);
-        }
-      }
-    }
-    // Default values
-    return {
-      activeArtisans: 245,
-      totalProducts: 1523,
-      avgOrderValue: 89,
-      countriesServed: 34,
-      lastUpdated: new Date()
-    };
+  const [stats, setStats] = useState({
+    activeArtisans: 245,
+    totalProducts: 1523,
+    avgOrderValue: 89,
+    countriesServed: 34,
+    lastUpdated: new Date()
   });
   
-  const [timeUntilUpdate, setTimeUntilUpdate] = useState(() => {
-    // Calculate time until next update based on last updated time
-    if (typeof window !== 'undefined') {
-      const lastUpdateTime = stats.lastUpdated.getTime();
-      const now = new Date().getTime();
-      const elapsedSeconds = Math.floor((now - lastUpdateTime) / 1000);
-      const remainingSeconds = Math.max(0, (60 * 60) - elapsedSeconds); // 60 minutes - elapsed time
-      return remainingSeconds;
-    }
-    return 60 * 60; // Default 60 minutes
-  });
-  
+  const [timeUntilUpdate, setTimeUntilUpdate] = useState(60 * 60); // 60 minutes in seconds
   const [isUpdating, setIsUpdating] = useState(false);
-
-  // Save stats to localStorage whenever they change
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('marketStats', JSON.stringify(stats));
-    }
-  }, [stats]);
 
   // Simulate live data updates every 60 minutes
   useEffect(() => {
@@ -89,17 +49,14 @@ const MarketStats = () => {
       
       // Simulate fetching new data
       setTimeout(() => {
-        const newStats = {
+        setStats({
           activeArtisans: Math.floor(Math.random() * 50) + 220,
           totalProducts: Math.floor(Math.random() * 200) + 1400,
           avgOrderValue: Math.floor(Math.random() * 30) + 75,
           countriesServed: Math.floor(Math.random() * 10) + 30,
           lastUpdated: new Date()
-        };
-        
-        setStats(newStats);
+        });
         setIsUpdating(false);
-        setTimeUntilUpdate(60 * 60); // Reset to 60 minutes
       }, 1000);
     };
 
@@ -129,26 +86,6 @@ const MarketStats = () => {
     } else {
       return `${seconds}s`;
     }
-  };
-
-  // Manual refresh function
-  const handleManualRefresh = () => {
-    setIsUpdating(true);
-    
-    // Simulate fetching new data
-    setTimeout(() => {
-      const newStats = {
-        activeArtisans: Math.floor(Math.random() * 50) + 220,
-        totalProducts: Math.floor(Math.random() * 200) + 1400,
-        avgOrderValue: Math.floor(Math.random() * 30) + 75,
-        countriesServed: Math.floor(Math.random() * 10) + 30,
-        lastUpdated: new Date()
-      };
-      
-      setStats(newStats);
-      setIsUpdating(false);
-      setTimeUntilUpdate(60 * 60); // Reset to 60 minutes
-    }, 1000);
   };
 
   const statItems = [
@@ -185,21 +122,12 @@ const MarketStats = () => {
   return (
     <div className="bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-2xl p-4 sm:p-6 border border-primary/10">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg sm:text-xl font-heading font-bold flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Live Market Stats
-          </h2>
-          <button
-            onClick={handleManualRefresh}
-            disabled={isUpdating}
-            className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors disabled:opacity-50"
-            title="Refresh stats now"
-          >
-            <RefreshCw className={`h-4 w-4 ${isUpdating ? 'animate-spin text-primary' : ''}`} />
-          </button>
-        </div>
+        <h2 className="text-lg sm:text-xl font-heading font-bold flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-primary" />
+          Live Market Stats
+        </h2>
         <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+          <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${isUpdating ? 'animate-spin text-primary' : ''}`} />
           <span>Updates in {formatTimeUntil()}</span>
         </div>
       </div>
@@ -228,7 +156,7 @@ const MarketStats = () => {
       </div>
       
       <div className="mt-3 text-xs text-center text-muted-foreground">
-        Last updated: {stats.lastUpdated.toLocaleTimeString()} • Stats persist across page reloads
+        Last updated: {stats.lastUpdated.toLocaleTimeString()}
       </div>
     </div>
   );
@@ -451,7 +379,7 @@ const QuickFilters = ({ currentFilter, onFilterChange }: { currentFilter: string
     { id: 'featured', label: 'Featured', icon: <Award className="h-4 w-4" /> },
     { id: 'best-sellers', label: 'Best Sellers', icon: <TrendingUp className="h-4 w-4" /> },
     { id: 'new-arrivals', label: 'New Arrivals', icon: <Sparkles className="h-4 w-4" /> },
-    { id: 'sale', label: 'On Sale', icon: <Clock className="h-4 w-4" /> }
+    { id: 'on-sale', label: 'On Sale', icon: <Clock className="h-4 w-4" /> }
   ];
 
   return (
@@ -558,7 +486,6 @@ const Pagination = ({
 
 export default function MarketplacePage() {
   const searchParams = useSearchParams();
-  const { addItem } = useCart();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(() => {
     // Initialize with category from URL if present
@@ -576,15 +503,22 @@ export default function MarketplacePage() {
     let filtered = [...products];
 
     // Apply quick filter
-    if (activeFilter === 'featured') {
-      filtered = filtered.filter(p => p.featured === true);
-    } else if (activeFilter === 'best-sellers') {
-      filtered = filtered.filter(p => p.bestSeller === true);
-    } else if (activeFilter === 'new-arrivals') {
-      // Use ID as proxy for new arrivals (higher ID = newer)
-      filtered = filtered.filter(p => p.id > 5);
-    } else if (activeFilter === 'sale') {
-      filtered = filtered.filter(p => p.discount && p.discount > 0);
+    switch (activeFilter) {
+      case 'featured':
+        filtered = filtered.filter(p => p.featured);
+        break;
+      case 'best-sellers':
+        filtered = filtered.filter(p => p.bestSeller);
+        break;
+      case 'new-arrivals':
+        filtered = filtered.filter(p => p.newArrival);
+        break;
+      case 'on-sale':
+        filtered = filtered.filter(p => p.onSale);
+        break;
+      default:
+        // all products - no filter
+        break;
     }
 
     // Apply category filter from URL or sidebar
@@ -607,11 +541,13 @@ export default function MarketplacePage() {
         filtered.sort((a, b) => b.price - a.price);
         break;
       case "newest":
-        // Sort by ID as proxy for newest (higher ID = newer)
-        filtered.sort((a, b) => b.id - a.id);
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
       case "rating":
         filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      case "popular":
+        filtered.sort((a, b) => (b.soldCount || 0) - (a.soldCount || 0));
         break;
       default:
         // featured - keep original order
@@ -623,11 +559,17 @@ export default function MarketplacePage() {
 
   const filteredProducts = getFilteredProducts();
   
-  // Pagination settings
-  const itemsPerPage = 10;
+  // Pagination settings - 3 pages with different items per page
+  const getItemsPerPage = (page: number) => {
+    if (page === 1) return 9;  // Page 1: 9 products
+    if (page === 2) return 11; // Page 2: 11 products
+    return 10; // Page 3: 10 products
+  };
+
+  const itemsPerPage = getItemsPerPage(currentPage);
   
   // Calculate total pages based on filtered products count
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredProducts.length / 10); // Using 10 as base for calculation
 
   // Get current page items
   const getCurrentPageItems = () => {
@@ -658,22 +600,6 @@ export default function MarketplacePage() {
     setCurrentPage(1);
   };
 
-  const handleAddToCart = (product: typeof products[0]) => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      quantity: 1,
-      image: product.image,
-      artisan: product.artisan
-    });
-    
-    toast.success("Added to cart!", {
-      description: product.name,
-      duration: 3000,
-    });
-  };
-
   const currentItems = getCurrentPageItems();
 
   return (
@@ -685,7 +611,7 @@ export default function MarketplacePage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-7xl">
-        {/* Live Market Stats with Persistence */}
+        {/* Live Market Stats */}
         <div className="mb-8 sm:mb-12">
           <MarketStats />
         </div>
@@ -755,6 +681,7 @@ export default function MarketplacePage() {
               className="px-3 py-2 rounded-lg border border-primary/20 bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
             >
               <option value="featured">Featured</option>
+              <option value="popular">Most Popular</option>
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
               <option value="newest">Newest First</option>
@@ -972,9 +899,9 @@ export default function MarketplacePage() {
                                   <span className="text-xs text-muted-foreground">
                                     ({product.reviews} reviews)
                                   </span>
-                                  {product.reviews && (
+                                  {product.soldCount && (
                                     <span className="text-xs text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
-                                      {product.reviews} sold
+                                      {product.soldCount} sold
                                     </span>
                                   )}
                                 </div>
@@ -991,11 +918,7 @@ export default function MarketplacePage() {
                                     ${product.originalPrice.toFixed(2)}
                                   </div>
                                 )}
-                                <Button 
-                                  onClick={() => handleAddToCart(product)}
-                                  className="mt-3 bg-gradient-to-r from-primary to-secondary" 
-                                  size="sm"
-                                >
+                                <Button className="mt-3 bg-gradient-to-r from-primary to-secondary" size="sm">
                                   <ShoppingBag className="h-4 w-4 mr-2" />
                                   Add to Cart
                                 </Button>

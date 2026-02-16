@@ -1,0 +1,265 @@
+export interface Product {
+  id: number
+  name: string
+  description: string
+  price: number
+  originalPrice?: number
+  image: string
+  category: string
+  categorySlug: string
+  artisan: string
+  artisanId: number
+  artisanImage: string
+  artisanLocation?: string
+  rating: number
+  reviews: number
+  inStock: boolean
+  tags: string[]
+  discount?: number
+  bestSeller?: boolean
+  featured?: boolean
+}
+
+export const products: Product[] = [
+  {
+    id: 1,
+    name: "Hand-Thrown Ceramic Bowl Set",
+    description: "Set of 3 beautifully hand-thrown ceramic bowls with natural ash glaze. Each bowl is unique in shape and pattern.",
+    price: 145.00,
+    originalPrice: 185.00,
+    image: "/images/artisans/pottery1.jpg",
+    category: "Pottery & Ceramics",
+    categorySlug: "pottery",
+    artisan: "Elena Rodriguez",
+    artisanId: 101,
+    artisanImage: "/images/artisans/elena.jpg",
+    artisanLocation: "Santa Fe, NM",
+    rating: 4.8,
+    reviews: 42,
+    inStock: true,
+    tags: ["Handmade", "Eco-friendly", "Microwave Safe", "Dishwasher Safe"],
+    discount: 22,
+    bestSeller: true,
+    featured: true
+  },
+  {
+    id: 2,
+    name: "Solid Walnut Coffee Table",
+    description: "Mid-century modern coffee table crafted from solid walnut with hand-carved tapered legs.",
+    price: 850.00,
+    originalPrice: 950.00,
+    image: "/images/artisans/woodwork1.jpg",
+    category: "Woodwork",
+    categorySlug: "woodwork",
+    artisan: "James Wilson",
+    artisanId: 102,
+    artisanImage: "/images/artisans/james.jpg",
+    artisanLocation: "Portland, OR",
+    rating: 4.9,
+    reviews: 38,
+    inStock: true,
+    tags: ["Solid Walnut", "Hand Carved", "Heirloom Quality", "Sustainable"],
+    discount: 11,
+    bestSeller: true,
+    featured: true
+  },
+  {
+    id: 3,
+    name: "Turquoise & Silver Statement Necklace",
+    description: "Handcrafted sterling silver necklace featuring natural turquoise stones.",
+    price: 189.00,
+    originalPrice: 225.00,
+    image: "/images/artisans/jewelry1.jpg",
+    category: "Jewelry",
+    categorySlug: "jewelry",
+    artisan: "Sophia Chen",
+    artisanId: 103,
+    artisanImage: "/images/artisans/sophia.jpg",
+    artisanLocation: "San Francisco, CA",
+    rating: 4.7,
+    reviews: 56,
+    inStock: true,
+    tags: ["Sterling Silver", "Natural Turquoise", "Adjustable", "Gift Box"],
+    discount: 16,
+    bestSeller: false,
+    featured: true
+  },
+  {
+    id: 4,
+    name: "Artisan Stoneware Mug Collection",
+    description: "Collection of 6 unique hand-painted stoneware mugs.",
+    price: 165.00,
+    originalPrice: 195.00,
+    image: "/images/artisans/pottery2.jpg",
+    category: "Pottery & Ceramics",
+    categorySlug: "pottery",
+    artisan: "Elena Rodriguez",
+    artisanId: 101,
+    artisanImage: "/images/artisans/elena.jpg",
+    artisanLocation: "Santa Fe, NM",
+    rating: 4.6,
+    reviews: 87,
+    inStock: true,
+    tags: ["Set of 6", "Dishwasher Safe", "Food Safe", "Oven Safe"],
+    discount: 15,
+    bestSeller: true,
+    featured: true
+  },
+  {
+    id: 5,
+    name: "Professional End-Grain Cutting Board",
+    description: "Professional end-grain oak cutting board with juice groove.",
+    price: 125.00,
+    originalPrice: 150.00,
+    image: "/images/artisans/woodwork2.jpg",
+    category: "Woodwork",
+    categorySlug: "woodwork",
+    artisan: "James Wilson",
+    artisanId: 102,
+    artisanImage: "/images/artisans/james.jpg",
+    artisanLocation: "Portland, OR",
+    rating: 4.8,
+    reviews: 94,
+    inStock: true,
+    tags: ["End Grain", "Juice Groove", "Food Safe Oil", "Reversible"],
+    discount: 17,
+    bestSeller: false,
+    featured: true
+  },
+  {
+    id: 6,
+    name: "14K Gold Filigree Earrings",
+    description: "Exquisite 14K gold filigree drop earrings with freshwater pearls.",
+    price: 245.00,
+    originalPrice: 295.00,
+    image: "/images/artisans/jewelry2.jpg",
+    category: "Jewelry",
+    categorySlug: "jewelry",
+    artisan: "Sophia Chen",
+    artisanId: 103,
+    artisanImage: "/images/artisans/sophia.jpg",
+    artisanLocation: "San Francisco, CA",
+    rating: 4.9,
+    reviews: 63,
+    inStock: true,
+    tags: ["14K Gold", "Freshwater Pearls", "Hypoallergenic", "Elegant Box"],
+    discount: 17,
+    bestSeller: true,
+    featured: true
+  },
+  {
+    id: 7,
+    name: "Hand-Blown Glass Vase",
+    description: "Hand-blown glass vase with iridescent finish.",
+    price: 175.00,
+    originalPrice: 195.00,
+    image: "/images/artisans/glass1.jpg",
+    category: "Glass Art",
+    categorySlug: "glass",
+    artisan: "Marcus Thorne",
+    artisanId: 104,
+    artisanImage: "/images/artisans/marcus.jpg",
+    artisanLocation: "Asheville, NC",
+    rating: 4.7,
+    reviews: 28,
+    inStock: true,
+    tags: ["Hand-Blown", "Iridescent", "One of a Kind"],
+    discount: 10,
+    bestSeller: false,
+    featured: false
+  },
+  {
+    id: 8,
+    name: "Handwoven Wool Blanket",
+    description: "Traditional handwoven wool blanket with geometric patterns.",
+    price: 220.00,
+    originalPrice: 250.00,
+    image: "/images/artisans/textiles1.jpg",
+    category: "Textiles & Weaving",
+    categorySlug: "textiles",
+    artisan: "Isabella Santos",
+    artisanId: 105,
+    artisanImage: "/images/artisans/isabella.jpg",
+    artisanLocation: "Miami, FL",
+    rating: 4.9,
+    reviews: 45,
+    inStock: true,
+    tags: ["Handwoven", "Wool", "Geometric Pattern"],
+    discount: 12,
+    bestSeller: true,
+    featured: false
+  },
+  {
+    id: 9,
+    name: "Copper Tea Kettle",
+    description: "Hand-hammered copper tea kettle with brass handle.",
+    price: 195.00,
+    originalPrice: 225.00,
+    image: "/images/artisans/metal1.jpg",
+    category: "Metalwork",
+    categorySlug: "metal",
+    artisan: "David Kim",
+    artisanId: 106,
+    artisanImage: "/images/artisans/david.jpg",
+    artisanLocation: "Seattle, WA",
+    rating: 4.8,
+    reviews: 31,
+    inStock: true,
+    tags: ["Copper", "Hand-Hammered", "Stovetop Safe"],
+    discount: 13,
+    bestSeller: false,
+    featured: false
+  },
+  {
+    id: 10,
+    name: "Leather Messenger Bag",
+    description: "Full-grain leather messenger bag with brass hardware.",
+    price: 325.00,
+    originalPrice: 375.00,
+    image: "/images/artisans/leather1.jpg",
+    category: "Leather Goods",
+    categorySlug: "leather",
+    artisan: "Robert Martinez",
+    artisanId: 107,
+    artisanImage: "/images/artisans/robert.jpg",
+    artisanLocation: "Austin, TX",
+    rating: 4.9,
+    reviews: 52,
+    inStock: true,
+    tags: ["Full-Grain", "Hand-Stitched", "Adjustable Strap"],
+    discount: 13,
+    bestSeller: true,
+    featured: false
+  }
+];
+
+export const categories = [
+  { id: 1, name: "Pottery & Ceramics", slug: "pottery", count: 42, icon: "🏺", color: "bg-amber-500" },
+  { id: 2, name: "Textiles & Weaving", slug: "textiles", count: 38, icon: "🧵", color: "bg-pink-500" },
+  { id: 3, name: "Woodwork", slug: "woodwork", count: 56, icon: "🪵", color: "bg-yellow-700" },
+  { id: 4, name: "Jewelry", slug: "jewelry", count: 67, icon: "💍", color: "bg-purple-500" },
+  { id: 5, name: "Glass Art", slug: "glass", count: 23, icon: "🥃", color: "bg-blue-400" },
+  { id: 6, name: "Metalwork", slug: "metal", count: 31, icon: "⚒️", color: "bg-gray-600" },
+  { id: 7, name: "Leather Goods", slug: "leather", count: 29, icon: "👜", color: "bg-amber-700" },
+  { id: 8, name: "Paper Crafts", slug: "paper", count: 18, icon: "📜", color: "bg-green-500" }
+];
+
+export function getProductsByCategory(categorySlug: string): Product[] {
+  return products.filter(p => p.categorySlug === categorySlug);
+}
+
+export function getProductById(id: number): Product | undefined {
+  return products.find(p => p.id === id);
+}
+
+export function getFeaturedProducts(): Product[] {
+  return products.filter(p => p.featured);
+}
+
+export function getBestSellers(): Product[] {
+  return products.filter(p => p.bestSeller);
+}
+
+export function getProductsByArtisan(artisanId: number): Product[] {
+  return products.filter(p => p.artisanId === artisanId);
+}

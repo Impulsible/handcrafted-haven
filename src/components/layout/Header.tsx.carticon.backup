@@ -4,34 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  ShoppingBag,
-  Search,
-  User,
-  Menu,
-  Heart,
-  X,
-  ChevronRight,
-  Home,
-  Store,
-  Users,
-  Grid,
-  Info,
-  Mail,
-  Phone,
-  MapPin,
-  ShoppingCart,
-  Package,
-  LogOut,
-  Settings,
-  CreditCard,
-  ChevronDown
+  ShoppingBag, Search, User, Menu, Heart, X, ChevronRight, Home,
+  Store, Users, Grid, Info, Mail, Phone, MapPin, ShoppingCart,
+  Package, LogOut, Settings, CreditCard, ChevronDown
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
-import CartIcon from "@/components/cart/CartIcon";
 
 // Promo messages
 const promoMessages = [
@@ -40,7 +21,7 @@ const promoMessages = [
   { id: 3, text: "🌟 Artisan Spotlight: Meet Our Featured Creator", type: "spotlight" },
   { id: 4, text: "⚡ Flash Sale: 24 Hours Only - 30% Off Textiles", type: "sale" },
   { id: 5, text: "🎭 Upcoming Workshop: Pottery Basics This Saturday", type: "event" },
-  { id: 6, text: "🍀 Spring Collection - Fresh Designs for the Season", type: "seasonal" },
+  { id: 6, text: "💝 Valentine's Collection - Limited Edition Pieces", type: "seasonal" },
   { id: 7, text: "🌱 Sustainable Crafting Month - Eco-friendly Products", type: "sustainable" }
 ];
 
@@ -74,7 +55,7 @@ const navigationItems: NavItem[] = [
         { href: "/marketplace/featured", label: "Featured", description: "Curated collections" },
         { href: "/marketplace/new", label: "New Arrivals", description: "Fresh from artisans" },
         { href: "/marketplace/best-sellers", label: "Best Sellers", description: "Community favorites" },
-        { href: "/marketplace/sale", label: "On Sale", description: "Special discounts" }
+        { href: "/marketplace/sale", label: "On Sale", description: "Special discounts" },
       ]
     }
   },
@@ -89,7 +70,7 @@ const navigationItems: NavItem[] = [
         { href: "/artisans/featured", label: "Featured Artisans", description: "Spotlight creators" },
         { href: "/artisans/nearby", label: "Local Artisans", description: "Discover nearby makers" },
         { href: "/artisans/workshops", label: "Workshops", description: "Learn from experts" },
-        { href: "/artisans/stories", label: "Stories", description: "Behind the craft" }
+        { href: "/artisans/stories", label: "Stories", description: "Behind the craft" },
       ]
     }
   },
@@ -106,7 +87,7 @@ const navigationItems: NavItem[] = [
         { href: "/categories/woodwork", label: "Woodwork", description: "Carved creations" },
         { href: "/categories/glass", label: "Glass Art", description: "Blown glass pieces" },
         { href: "/categories/metal", label: "Metalwork", description: "Forged and formed" },
-        { href: "/categories/paper", label: "Paper Crafts", description: "Delicate paper art" }
+        { href: "/categories/paper", label: "Paper Crafts", description: "Delicate paper art" },
       ]
     }
   },
@@ -114,7 +95,7 @@ const navigationItems: NavItem[] = [
     href: "/about",
     label: "About",
     icon: <Info className="h-5 w-5" />
-  }
+  },
 ];
 
 // Mock user data
@@ -138,7 +119,7 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  
+  const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
 
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
@@ -157,6 +138,7 @@ export default function Header() {
     } else {
       document.body.style.overflow = 'unset';
     }
+
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -168,9 +150,10 @@ export default function Header() {
       if (!(event.target as Element).closest('.dropdown-container')) {
         setActiveDropdown(null);
         setIsUserMenuOpen(false);
-        
+        setIsCartPreviewOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -209,7 +192,17 @@ export default function Header() {
     }
   };
 
-  
+  // Cart preview handlers
+  const handleViewCart = () => {
+    setIsCartPreviewOpen(false);
+    router.push('/cart');
+  };
+
+  const handleCheckout = () => {
+    setIsCartPreviewOpen(false);
+    router.push('/checkout');
+  };
+
   // User menu handlers
   const handleLogin = () => {
     toast.success("Welcome back! Redirecting to dashboard...");
@@ -402,8 +395,128 @@ export default function Header() {
                 )}
               </button>
 
-              {/* Cart Icon */}
-              <CartIcon />
+              {/* Cart with Preview */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsCartPreviewOpen(!isCartPreviewOpen)}
+                  className="p-2 hover:bg-accent/10 rounded-full transition-colors relative group"
+                >
+                  <ShoppingBag className="h-4.5 w-4.5 text-foreground group-hover:scale-110 transition-transform" />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4.5 w-4.5 rounded-full bg-secondary text-white text-[11px] flex items-center justify-center font-bold shadow-sm group-hover:scale-110 transition-transform">
+                      {itemCount > 99 ? '99+' : itemCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Cart Preview Dropdown */}
+                {isCartPreviewOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-80 sm:w-96 bg-background border border-primary/20 rounded-xl shadow-lg overflow-hidden z-50">
+                    <div className="p-4 border-b border-primary/10 bg-primary/5">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-primary">Your Shopping Cart</h3>
+                        <Badge variant="secondary" className="font-bold">
+                          {itemCount} items
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="max-h-96 overflow-y-auto">
+                      {items.length === 0 ? (
+                        <div className="p-8 text-center">
+                          <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                          <p className="text-foreground font-medium">Your cart is empty</p>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            Add some handcrafted items to get started
+                          </p>
+                          <Button
+                            className="mt-4 w-full"
+                            onClick={() => {
+                              setIsCartPreviewOpen(false);
+                              router.push('/marketplace');
+                            }}
+                          >
+                            Start Shopping
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Cart Items */}
+                          <div className="divide-y divide-primary/10">
+                            {items.slice(0, 3).map((item) => (
+                              <div key={item.id} className="p-4 hover:bg-primary/5 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                                    <Package className="h-8 w-8 text-primary" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-foreground truncate">
+                                      {item.name}
+                                    </p>
+                                    <div className="flex items-center justify-between mt-2">
+                                      <span className="font-bold text-primary">
+                                        ${(item.price * item.quantity).toFixed(2)}
+                                      </span>
+                                      <span className="text-sm text-muted-foreground">
+                                        Qty: {item.quantity}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+
+                            {items.length > 3 && (
+                              <div className="p-4 text-center">
+                                <p className="text-sm text-muted-foreground">
+                                  +{items.length - 3} more items in cart
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Cart Summary */}
+                          <div className="p-4 border-t border-primary/10 bg-primary/5">
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Subtotal</span>
+                                <span className="font-semibold">${totalPrice.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Estimated Shipping</span>
+                                <span className="font-semibold">$4.99</span>
+                              </div>
+                              <div className="border-t pt-2 mt-2">
+                                <div className="flex justify-between font-bold">
+                                  <span>Total</span>
+                                  <span>${(totalPrice + 4.99).toFixed(2)}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="grid grid-cols-2 gap-2 mt-4">
+                              <Button
+                                variant="outline"
+                                className="w-full"
+                                onClick={handleViewCart}
+                              >
+                                View Cart
+                              </Button>
+                              <Button
+                                className="w-full bg-gradient-to-r from-primary to-secondary"
+                                onClick={handleCheckout}
+                              >
+                                Checkout
+                              </Button>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* User Menu */}
               <div className="relative">
@@ -741,7 +854,7 @@ export default function Header() {
                   Handcrafted Haven {APP_VERSION}
                 </p>
                 <p className="text-[10px] text-muted-foreground/60">
-                  Ã‚Â© {new Date().getFullYear()} All artisan works are authentic and handmade
+                  © {new Date().getFullYear()} All artisan works are authentic and handmade
                 </p>
               </div>
             </div>

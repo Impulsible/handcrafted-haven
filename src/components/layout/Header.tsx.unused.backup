@@ -40,7 +40,7 @@ const promoMessages = [
   { id: 3, text: "🌟 Artisan Spotlight: Meet Our Featured Creator", type: "spotlight" },
   { id: 4, text: "⚡ Flash Sale: 24 Hours Only - 30% Off Textiles", type: "sale" },
   { id: 5, text: "🎭 Upcoming Workshop: Pottery Basics This Saturday", type: "event" },
-  { id: 6, text: "🍀 Spring Collection - Fresh Designs for the Season", type: "seasonal" },
+  { id: 6, text: "💝 Valentine's Collection - Limited Edition Pieces", type: "seasonal" },
   { id: 7, text: "🌱 Sustainable Crafting Month - Eco-friendly Products", type: "sustainable" }
 ];
 
@@ -138,7 +138,7 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  
+  const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
 
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
@@ -168,7 +168,7 @@ export default function Header() {
       if (!(event.target as Element).closest('.dropdown-container')) {
         setActiveDropdown(null);
         setIsUserMenuOpen(false);
-        
+        setIsCartPreviewOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -209,7 +209,17 @@ export default function Header() {
     }
   };
 
-  
+  // Cart preview handlers
+  const handleViewCart = () => {
+    setIsCartPreviewOpen(false);
+    router.push('/cart');
+  };
+
+  const handleCheckout = () => {
+    setIsCartPreviewOpen(false);
+    router.push('/checkout');
+  };
+
   // User menu handlers
   const handleLogin = () => {
     toast.success("Welcome back! Redirecting to dashboard...");
@@ -741,7 +751,7 @@ export default function Header() {
                   Handcrafted Haven {APP_VERSION}
                 </p>
                 <p className="text-[10px] text-muted-foreground/60">
-                  Ã‚Â© {new Date().getFullYear()} All artisan works are authentic and handmade
+                  © {new Date().getFullYear()} All artisan works are authentic and handmade
                 </p>
               </div>
             </div>

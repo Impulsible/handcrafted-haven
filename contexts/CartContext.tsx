@@ -1,6 +1,6 @@
-"use client"
+﻿'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 
 export interface CartItem {
   id: number
@@ -8,7 +8,6 @@ export interface CartItem {
   price: number
   quantity: number
   image?: string
-  artisan?: string
 }
 
 export interface CartContextType {
@@ -24,37 +23,25 @@ export interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-const CART_STORAGE_KEY = 'handcrafted-haven-cart'
-
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
-  const [isLoaded, setIsLoaded] = useState(false)
 
-  // Load cart from localStorage only on client side after mount
+  // Load cart from localStorage on mount
   useEffect(() => {
-    try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY)
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart)
-        setItems(parsedCart)
+    const savedCart = localStorage.getItem('cart')
+    if (savedCart) {
+      try {
+        setItems(JSON.parse(savedCart))
+      } catch (error) {
+        console.error('Failed to parse cart:', error)
       }
-    } catch (error) {
-      console.error('Failed to load cart from localStorage:', error)
-    } finally {
-      setIsLoaded(true)
     }
   }, [])
 
-  // Save cart to localStorage whenever it changes (but only after initial load)
+  // Save to localStorage whenever cart changes
   useEffect(() => {
-    if (isLoaded) {
-      try {
-        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
-      } catch (error) {
-        console.error('Failed to save cart to localStorage:', error)
-      }
-    }
-  }, [items, isLoaded])
+    localStorage.setItem('cart', JSON.stringify(items))
+  }, [items])
 
   const addItem = (item: CartItem) => {
     setItems((prev) => {
@@ -73,6 +60,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const updateQuantity = (id: number, quantity: number) => {
+    if (quantity < 1) {
+      removeItem(id)
+      return
+    }
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, quantity } : item))
     )
