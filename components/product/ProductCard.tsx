@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -22,7 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     setIsAdding(true)
     
     addItem({
-      id: product.id,
+      id: Number(product.id),
       name: product.name,
       price: product.price,
       quantity: 1,
@@ -49,7 +49,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group relative bg-card border border-primary/10 rounded-2xl overflow-hidden card-hover">
       {/* Product Image */}
-      <Link href={/products/}>
+      <Link href={`/products/${product.id}`}>
         <div className="relative h-64 w-full overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 z-10" />
           <div className="relative h-full w-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
@@ -86,7 +86,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Product Info */}
       <div className="p-5">
-        <Link href={/products/}>
+        <Link href={`/products/${product.id}`}>
           <div className="flex items-start justify-between mb-2">
             <div>
               <h3 className="font-semibold text-lg hover:text-primary transition-colors line-clamp-1">
@@ -131,3 +131,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     </div>
   )
 }
+
+
+

@@ -1,5 +1,5 @@
-"use client";
-
+﻿"use client";
+import { X } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -396,7 +396,7 @@ export default function AboutPage() {
             </h1>
             
             <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Handcrafted Haven is more than a marketplace — we're a community dedicated to preserving traditional crafts, supporting artisans, and bringing authentic handmade pieces to the world.
+              Handcrafted Haven is more than a marketplace â€” we're a community dedicated to preserving traditional crafts, supporting artisans, and bringing authentic handmade pieces to the world.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -726,3 +726,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

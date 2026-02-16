@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -10,23 +10,57 @@ import {
   Instagram, 
   Twitter,
   ShoppingBag,
-  Sparkles,
   Award,
-  Clock,
   ArrowRight,
   Search,
-  Filter,
-  X
+  Filter
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { products } from "@/data/products";
 
+// Define Product type from your data
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  image: string;
+  category: string;
+  inStock: boolean;
+  rating: number;
+  reviews: number;
+  artisan: string;
+  artisanId?: string;
+  artisanLocation?: string;
+  artisanAvatar?: string;
+  createdAt?: string;
+}
+
+// Define Artisan type interface
+interface Artisan {
+  id: string;
+  name: string;
+  location: string;
+  avatar: string;
+  specialty: string;
+  products: Product[]; // Replaced 'any[]' with Product[]
+  rating: number;
+  totalReviews: number;
+  joinDate: string;
+  bio: string;
+  social: {
+    instagram: string;
+    twitter: string;
+    website: string;
+  };
+}
+
 // Generate unique artisans from products
-const getUniqueArtisans = () => {
-  const artisanMap = new Map();
+const getUniqueArtisans = (): Artisan[] => {
+  const artisanMap = new Map<string, Artisan>();
   
-  products.forEach(product => {
+  products.forEach((product: Product) => {
     if (!artisanMap.has(product.artisan)) {
       artisanMap.set(product.artisan, {
         id: product.artisanId || `artisan-${product.id}`,
@@ -46,7 +80,7 @@ const getUniqueArtisans = () => {
         }
       });
     } else {
-      const existing = artisanMap.get(product.artisan);
+      const existing = artisanMap.get(product.artisan)!;
       existing.products.push(product);
       existing.rating = (existing.rating + product.rating) / 2;
       existing.totalReviews += product.reviews;
@@ -57,7 +91,7 @@ const getUniqueArtisans = () => {
 };
 
 // Artisan Card Component
-const ArtisanCard = ({ artisan }: { artisan: any }) => {
+const ArtisanCard = ({ artisan }: { artisan: Artisan }) => {
   const productCount = artisan.products.length;
   
   return (
@@ -110,7 +144,7 @@ const ArtisanCard = ({ artisan }: { artisan: any }) => {
 };
 
 // Featured Artisan Component
-const FeaturedArtisan = ({ artisan }: { artisan: any }) => {
+const FeaturedArtisan = ({ artisan }: { artisan: Artisan }) => {
   return (
     <div className="relative bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-3xl overflow-hidden">
       <div className="grid md:grid-cols-2 gap-8 items-center p-8 md:p-12">
@@ -193,31 +227,37 @@ const FeaturedArtisan = ({ artisan }: { artisan: any }) => {
 };
 
 export default function ArtisansPage() {
-  const [artisans, setArtisans] = useState<any[]>([]);
-  const [filteredArtisans, setFilteredArtisans] = useState<any[]>([]);
-  const [featuredArtisan, setFeaturedArtisan] = useState<any>(null);
+  const [artisans, setArtisans] = useState<Artisan[]>([]);
+  const [featuredArtisan, setFeaturedArtisan] = useState<Artisan | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
   const [isMounted, setIsMounted] = useState(false);
 
+  // Load artisans on mount - using a single state update with a timeout
   useEffect(() => {
-    setIsMounted(true);
     const allArtisans = getUniqueArtisans();
-    setArtisans(allArtisans);
-    setFilteredArtisans(allArtisans);
     
-    // Set a random featured artisan
-    if (allArtisans.length > 0) {
-      const randomIndex = Math.floor(Math.random() * allArtisans.length);
-      setFeaturedArtisan(allArtisans[randomIndex]);
-    }
-  }, []);
+    // Use a single state update with a microtask to avoid cascading renders
+    queueMicrotask(() => {
+      setArtisans(allArtisans);
+      
+      // Set a random featured artisan
+      if (allArtisans.length > 0) {
+        const randomIndex = Math.floor(Math.random() * allArtisans.length);
+        setFeaturedArtisan(allArtisans[randomIndex]);
+      }
+      
+      setIsMounted(true);
+    });
+  }, []); // Empty dependency array - runs once on mount
 
-  // Get unique specialties for filter
-  const specialties = ["all", ...new Set(artisans.map(a => a.specialty))];
+  // Get unique specialties for filter - using Array.from to fix Set iteration
+  const specialties = useMemo(() => {
+    return ["all", ...Array.from(new Set(artisans.map(a => a.specialty)))];
+  }, [artisans]);
 
-  // Handle search and filter
-  useEffect(() => {
+  // Use useMemo for filtered artisans instead of useEffect
+  const filteredArtisans = useMemo(() => {
     let filtered = [...artisans];
     
     // Apply search
@@ -234,7 +274,7 @@ export default function ArtisansPage() {
       filtered = filtered.filter(a => a.specialty === selectedSpecialty);
     }
     
-    setFilteredArtisans(filtered);
+    return filtered;
   }, [searchQuery, selectedSpecialty, artisans]);
 
   if (!isMounted) {
@@ -327,7 +367,7 @@ export default function ArtisansPage() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredArtisans.map((artisan, index) => (
-              <ArtisanCard key={index} artisan={artisan} />
+              <ArtisanCard key={artisan.id || `artisan-${index}`} artisan={artisan} />
             ))}
           </div>
         )}

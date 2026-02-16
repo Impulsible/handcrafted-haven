@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -21,7 +21,7 @@ export default function AllArtisansPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("all");
   
-  const specialties = ["all", ...new Set(artisans.map(a => a.specialty))];
+  const specialties = ["all", ...Array.from(new Set(artisans.map(a => a.specialty)))];
   
   const filteredArtisans = artisans.filter(artisan => {
     const matchesSearch = artisan.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -218,3 +218,4 @@ export default function AllArtisansPage() {
     </div>
   );
 }
+
