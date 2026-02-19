@@ -1,40 +1,25 @@
-import type { Metadata } from "next";
-import { Open_Sans, Playfair_Display, Dancing_Script } from "next/font/google";
+﻿import type { Metadata } from "next";
+import { Inter, Dancing_Script } from "next/font/google";
 import { Toaster } from "sonner";
-import "./globals.css";
+import { CartProvider } from "@/contexts/CartContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { CartProvider } from "@/contexts/CartContext";
+import "./globals.css";
 
-const openSans = Open_Sans({
+const inter = Inter({ 
   subsets: ["latin"],
-  variable: "--font-open-sans",
+  variable: "--font-inter",
 });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-});
-
-const dancing = Dancing_Script({
+const dancingScript = Dancing_Script({ 
   subsets: ["latin"],
   variable: "--font-dancing",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Handcrafted Haven | Artisan Marketplace",
-  description: "Discover unique handmade crafts from talented artisans worldwide",
-  keywords: ["handmade", "artisan", "crafts", "marketplace", "handcrafted"],
-  authors: [{ name: "Handcrafted Haven Team" }],
-  creator: "BYU-I WDD 430",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://handcrafted-haven.vercel.app",
-    title: "Handcrafted Haven | Artisan Marketplace",
-    description: "Discover unique handmade crafts from talented artisans worldwide",
-    siteName: "Handcrafted Haven",
-  },
+  title: "Handcrafted Haven",
+  description: "Discover authentic handmade crafts from talented artisans",
 };
 
 export default function RootLayout({
@@ -42,43 +27,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Simple string concatenation - no template literals
+  const fontClass = inter.variable + " " + dancingScript.variable;
+
   return (
-    <html lang="en" className={`${openSans.variable} ${playfair.variable} ${dancing.variable}`}>
-      <body className="min-h-screen bg-background font-sans antialiased">
+    <html lang="en" className={fontClass}>
+      <body className="min-h-screen bg-background font-sans antialiased flex flex-col">
         <CartProvider>
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
-          <Toaster 
-            position="top-right"
-            richColors
-            closeButton
-            theme="light"
-            duration={4000}
-          />
+          <Toaster richColors position="top-right" />
         </CartProvider>
-      
-      {/* Temporary cart debug indicator - remove after testing */}
-      <div className="fixed bottom-4 left-4 z-50 bg-black/80 text-white text-xs px-3 py-2 rounded-full font-mono">
-        Ã°Å¸â€ºâ€™ Cart:  items
-      </div>
-      <script dangerouslySetInnerHTML={{
-        __html: `
-          function updateCartDebug() {
-            try {
-              const cart = localStorage.getItem('handcrafted-haven-cart');
-              if (cart) {
-                const items = JSON.parse(cart);
-                const count = items.reduce((sum, item) => sum + item.quantity, 0);
-                document.getElementById('cart-debug-count').textContent = count;
-              }
-            } catch(e) {}
-          }
-          updateCartDebug();
-          window.addEventListener('storage', updateCartDebug);
-        `
-      }} />
-</body>
+      </body>
     </html>
   );
 }

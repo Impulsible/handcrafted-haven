@@ -1,8 +1,73 @@
-// src/components/ui/LoadingSpinner.tsx
-export default function LoadingSpinner() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+"use client";
+
+import React from 'react';
+
+interface LoadingSpinnerProps {
+  fullScreen?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  text?: string;
+  className?: string;
+}
+
+export default function LoadingSpinner({ 
+  fullScreen = false, 
+  size = 'lg',
+  text = 'Loading...',
+  className = ''
+}: LoadingSpinnerProps) {
+  
+  const sizeClasses = {
+    sm: 'h-8 w-8 border-2',
+    md: 'h-16 w-16 border-4',
+    lg: 'h-24 w-24 border-4'
+  };
+
+  const spinner = (
+    <div className={`flex flex-col items-center justify-center ${className}`}>
+      {/* Double spinner for Jumia-like effect - SLOWER ANIMATION */}
+      <div className="relative">
+        {/* Outer spinner - slower rotation */}
+        <div
+          className={`
+            ${sizeClasses[size]}
+            rounded-full
+            border-primary/20
+            border-t-primary
+            border-r-secondary
+            animate-spin-slow
+            shadow-xl
+          `}
+        />
+        {/* Inner dot - slower pulse */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className={`
+            ${size === 'sm' ? 'h-2 w-2' : size === 'md' ? 'h-3 w-3' : 'h-4 w-4'}
+            bg-gradient-to-r from-primary to-secondary
+            rounded-full
+            animate-pulse-slow
+          `} />
+        </div>
+      </div>
+      
+      {text && (
+        <p className={`
+          mt-4 font-medium text-primary
+          ${size === 'sm' ? 'text-sm' : size === 'md' ? 'text-base' : 'text-lg'}
+          animate-pulse-slow
+        `}>
+          {text}
+        </p>
+      )}
     </div>
   );
+
+  if (fullScreen) {
+    return (
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[9999] flex items-center justify-center">
+        {spinner}
+      </div>
+    );
+  }
+
+  return spinner;
 }

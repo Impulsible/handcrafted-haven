@@ -1,0 +1,41 @@
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
+
+// Dynamically import the client component with SSR disabled
+const AllArtisansContent = dynamic(
+  () => import("./AllArtisansContent"),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen bg-gradient-to-b from-background to-background/95 flex items-center justify-center">
+        <div className="animate-pulse">
+          <div className="h-8 w-48 bg-primary/10 rounded mb-8 mx-auto"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1,2,3,4,5,6].map(i => (
+              <div key={i} className="h-64 bg-primary/10 rounded-xl"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+);
+
+export default function AllArtisansPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-background to-background/95 flex items-center justify-center">
+        <div className="animate-pulse">
+          <div className="h-8 w-48 bg-primary/10 rounded mb-8 mx-auto"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1,2,3,4,5,6].map(i => (
+              <div key={i} className="h-64 bg-primary/10 rounded-xl"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    }>
+      <AllArtisansContent />
+    </Suspense>
+  );
+}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -30,18 +30,19 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from '@/contexts/CartContext';
+import { useFavorite } from '@/hooks/useFavorite';
 import CartIcon from "@/components/cart/CartIcon";
 
 // Promo messages
 const promoMessages = [
-  { id: 1, text: "✨ Free Shipping on Orders Over $50", type: "shipping" },
-  { id: 2, text: "🎨 New Artisan Collection Just Dropped", type: "new" },
-  { id: 3, text: "🌟 Artisan Spotlight: Meet Our Featured Creator", type: "spotlight" },
-  { id: 4, text: "⚡ Flash Sale: 24 Hours Only - 30% Off Textiles", type: "sale" },
-  { id: 5, text: "🎭 Upcoming Workshop: Pottery Basics This Saturday", type: "event" },
-  { id: 6, text: "🍀 Spring Collection - Fresh Designs for the Season", type: "seasonal" },
-  { id: 7, text: "🌱 Sustainable Crafting Month - Eco-friendly Products", type: "sustainable" }
+  { id: 1, text: '✨ Free Shipping on Orders Over ', type: 'shipping' },
+  { id: 2, text: '🎨 New Artisan Collection Just Dropped', type: 'new' },
+  { id: 3, text: '🌟 Artisan Spotlight: Meet Our Featured Creator', type: 'spotlight' },
+  { id: 4, text: '⚡ Flash Sale: 24 Hours Only - 30% Off Textiles', type: 'sale' },
+  { id: 5, text: '🎭 Upcoming Workshop: Pottery Basics This Saturday', type: 'event' },
+  { id: 6, text: '🍀 Spring Collection - Fresh Designs for the Season', type: 'seasonal' },
+  { id: 7, text: '🌱 Sustainable Crafting Month - Eco-friendly Products', type: 'sustainable' }
 ];
 
 const APP_VERSION = "v2.1.4";
@@ -131,6 +132,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { items, totalPrice } = useCart();
+  const { handleFavoriteAction } = useFavorite();
 
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -391,7 +393,7 @@ export default function Header() {
 
               {/* Wishlist */}
               <button
-                onClick={() => router.push('/wishlist')}
+                onClick={() => handleFavoriteAction("view")}
                 className="p-2 hover:bg-accent/10 rounded-full transition-colors hidden sm:inline-flex relative group"
               >
                 <Heart className="h-4.5 w-4.5 text-foreground group-hover:scale-110 transition-transform" />
@@ -502,7 +504,7 @@ export default function Header() {
                             Sign In
                           </Button>
                           <Link
-                            href="/register"
+                            href="/auth/register"
                             className="block w-full text-center text-sm text-primary hover:underline"
                             onClick={() => setIsUserMenuOpen(false)}
                           >
@@ -741,7 +743,7 @@ export default function Header() {
                   Handcrafted Haven {APP_VERSION}
                 </p>
                 <p className="text-[10px] text-muted-foreground/60">
-                  Ã‚Â© {new Date().getFullYear()} All artisan works are authentic and handmade
+                  Ãƒâ€šÃ‚Â© {new Date().getFullYear()} All artisan works are authentic and handmade
                 </p>
               </div>
             </div>
@@ -751,3 +753,10 @@ export default function Header() {
     </>
   );
 }
+
+
+
+
+
+
+

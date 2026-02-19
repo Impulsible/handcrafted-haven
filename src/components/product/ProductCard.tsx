@@ -1,3 +1,5 @@
+﻿"use client";
+
 'use client'
 
 import Image from 'next/image'
@@ -8,12 +10,14 @@ import { useCart } from '@/contexts/CartContext'
 import { Product } from '@/types/product'
 import { toast } from 'sonner'
 import { useState } from 'react'
+import { useFavorite } from '@/hooks/useFavorite';
 
 interface ProductCardProps {
   product: Product
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const { handleFavoriteAction } = useFavorite();
   const { addItem } = useCart()
   const [isAdding, setIsAdding] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
@@ -144,3 +148,4 @@ export default function ProductCard({ product }: ProductCardProps) {
     </div>
   )
 }
+

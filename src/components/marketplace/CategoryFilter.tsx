@@ -1,3 +1,5 @@
+"use client";
+
 'use client'; // Add this for Next.js App Router
 
 import React, { useState } from 'react';

@@ -1,18 +1,17 @@
-﻿// src/components/providers/ClientWrapper.tsx
 "use client";
 
-import { CartProvider } from "@/contexts/CartContext";
-import { Toaster } from "sonner";
+import { ReactNode } from 'react';
+import NavigationProgress from '@/components/ui/NavigationProgress';
 
-export default function ClientWrapper({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+interface ClientWrapperProps {
+  children: ReactNode;
+}
+
+export default function ClientWrapper({ children }: ClientWrapperProps) {
   return (
-    <CartProvider>
-      <Toaster position="top-right" />
+    <>
+      <NavigationProgress />
       {children}
-    </CartProvider>
+    </>
   );
 }

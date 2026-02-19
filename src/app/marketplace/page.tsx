@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -28,8 +28,6 @@ import {
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/product/ProductCard";
 import { products, categories } from "@/data/products";
-import { useCart } from "@/contexts/CartContext";
-import { toast } from "sonner";
 
 // Live Market Stats Component with Persistence
 const MarketStats = () => {
@@ -451,7 +449,7 @@ const QuickFilters = ({ currentFilter, onFilterChange }: { currentFilter: string
     { id: 'featured', label: 'Featured', icon: <Award className="h-4 w-4" /> },
     { id: 'best-sellers', label: 'Best Sellers', icon: <TrendingUp className="h-4 w-4" /> },
     { id: 'new-arrivals', label: 'New Arrivals', icon: <Sparkles className="h-4 w-4" /> },
-    { id: 'sale', label: 'On Sale', icon: <Clock className="h-4 w-4" /> }
+    { id: 'on-sale', label: 'On Sale', icon: <Clock className="h-4 w-4" /> }
   ];
 
   return (
@@ -556,10 +554,8 @@ const Pagination = ({
   );
 };
 
-// Main content component that uses useSearchParams
-function MarketplaceContent() {
+export default function MarketplacePage() {
   const searchParams = useSearchParams();
-  const { addItem } = useCart();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(() => {
     // Initialize with category from URL if present
@@ -577,15 +573,22 @@ function MarketplaceContent() {
     let filtered = [...products];
 
     // Apply quick filter
-    if (activeFilter === 'featured') {
-      filtered = filtered.filter(p => p.featured === true);
-    } else if (activeFilter === 'best-sellers') {
-      filtered = filtered.filter(p => p.bestSeller === true);
-    } else if (activeFilter === 'new-arrivals') {
-      // Use ID as proxy for new arrivals (higher ID = newer)
-      filtered = filtered.filter(p => p.id > 5);
-    } else if (activeFilter === 'sale') {
-      filtered = filtered.filter(p => p.discount && p.discount > 0);
+    switch (activeFilter) {
+      case 'featured':
+        filtered = filtered.filter(p => p.featured);
+        break;
+      case 'best-sellers':
+        filtered = filtered.filter(p => p.bestSeller);
+        break;
+      case 'new-arrivals':
+        filtered = filtered.filter(p => p.newArrival);
+        break;
+      case 'on-sale':
+        filtered = filtered.filter(p => p.onSale);
+        break;
+      default:
+        // all products - no filter
+        break;
     }
 
     // Apply category filter from URL or sidebar
@@ -608,11 +611,13 @@ function MarketplaceContent() {
         filtered.sort((a, b) => b.price - a.price);
         break;
       case "newest":
-        // Sort by ID as proxy for newest (higher ID = newer)
-        filtered.sort((a, b) => b.id - a.id);
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
       case "rating":
         filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      case "popular":
+        filtered.sort((a, b) => (b.soldCount || 0) - (a.soldCount || 0));
         break;
       default:
         // featured - keep original order
@@ -624,11 +629,17 @@ function MarketplaceContent() {
 
   const filteredProducts = getFilteredProducts();
   
-  // Pagination settings
-  const itemsPerPage = 10;
+  // Pagination settings - 3 pages with different items per page
+  const getItemsPerPage = (page: number) => {
+    if (page === 1) return 9;  // Page 1: 9 products
+    if (page === 2) return 11; // Page 2: 11 products
+    return 10; // Page 3: 10 products
+  };
+
+  const itemsPerPage = getItemsPerPage(currentPage);
   
   // Calculate total pages based on filtered products count
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredProducts.length / 10); // Using 10 as base for calculation
 
   // Get current page items
   const getCurrentPageItems = () => {
@@ -657,22 +668,6 @@ function MarketplaceContent() {
     setSortBy("featured");
     setActiveFilter('all');
     setCurrentPage(1);
-  };
-
-  const handleAddToCart = (product: typeof products[0]) => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      quantity: 1,
-      image: product.image,
-      artisan: product.artisan
-    });
-    
-    toast.success("Added to cart!", {
-      description: product.name,
-      duration: 3000,
-    });
   };
 
   const currentItems = getCurrentPageItems();
@@ -756,6 +751,7 @@ function MarketplaceContent() {
               className="px-3 py-2 rounded-lg border border-primary/20 bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
             >
               <option value="featured">Featured</option>
+              <option value="popular">Most Popular</option>
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
               <option value="newest">Newest First</option>
@@ -992,11 +988,7 @@ function MarketplaceContent() {
                                     ${product.originalPrice.toFixed(2)}
                                   </div>
                                 )}
-                                <Button 
-                                  onClick={() => handleAddToCart(product)}
-                                  className="mt-3 bg-gradient-to-r from-primary to-secondary" 
-                                  size="sm"
-                                >
+                                <Button className="mt-3 bg-gradient-to-r from-primary to-secondary" size="sm">
                                   <ShoppingBag className="h-4 w-4 mr-2" />
                                   Add to Cart
                                 </Button>
@@ -1052,21 +1044,5 @@ function MarketplaceContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-// Main page component with Suspense boundary
-export default function MarketplacePage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-background to-background/95 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading marketplace...</p>
-        </div>
-      </div>
-    }>
-      <MarketplaceContent />
-    </Suspense>
   );
 }
