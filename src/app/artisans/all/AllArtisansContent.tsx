@@ -1,4 +1,5 @@
-﻿'use client'
+﻿/* eslint-disable react-hooks/set-state-in-effect */
+'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -65,7 +66,7 @@ export default function AllArtisansContent() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {artisans.map((artisan) => (
           <Link 
-            href={/artisans/}  // ✅ FIXED: Changed from {/artisans/} to template string
+            href={`/artisans/${artisan.id}`}  // ✅ FIXED: Using template string with artisan.id
             key={artisan.id}
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
           >

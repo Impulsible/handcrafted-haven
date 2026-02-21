@@ -1,6 +1,6 @@
 ﻿// Home Page Components
-export { HeroSection } from './HeroSection'
-export { CategoryShowcase } from './CategoryShowcase'
-export { FeaturedProducts } from './FeaturedProducts'
-export { ArtisanSpotlight } from './ArtisanSpotlight'
-export { Newsletter } from './Newsletter'
+export { default as HeroSection } from './HeroSection'
+export { default as CategoryShowcase } from './CategoryShowcase'
+export { default as FeaturedProducts } from './FeaturedProducts'
+export { default as ArtisanSpotlight } from './ArtisanSpotlight'
+export { default as Newsletter } from './Newsletter'

@@ -1,5 +1,5 @@
 ﻿// Product Components
-export { ProductCard } from './ProductCard'
-export { ProductDetails } from './ProductDetails'
-export { ProductReviews } from './ProductReviews'
-export { RelatedProducts } from './RelatedProducts'
+export { default as ProductCard } from './ProductCard'
+export { default as ProductDetails } from './ProductDetails'
+export { default as ProductReviews } from './ProductReviews'
+export { default as RelatedProducts } from './RelatedProducts'
