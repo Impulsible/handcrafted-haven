@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { categories } from "@/data/products";
 import { ArrowRight, Package, Sparkles } from "lucide-react";
 

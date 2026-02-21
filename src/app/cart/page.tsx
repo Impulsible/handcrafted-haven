@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
-import { useFavorite } from '@/hooks/useFavorite';
 import { toast } from "sonner";
 // Loading skeleton component
 const CartSkeleton = () => (
@@ -462,4 +461,3 @@ export default function CartPage() {
     </div>
   );
 }
-

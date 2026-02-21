@@ -1,9 +1,11 @@
-import Image from "next/image";
-import { Star, MapPin, Users } from "lucide-react";
+﻿import Image from "next/image";
+import Link from "next/link";
+import { Star, MapPin, Users, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const artisans = [
   {
+    id: "elena-rodriguez",
     name: "Elena Rodriguez",
     craft: "Pottery Artist",
     location: "Oaxaca, Mexico",
@@ -13,6 +15,7 @@ const artisans = [
     image: "/images/artisans/elena.jpg",
   },
   {
+    id: "james-watanabe",
     name: "James Watanabe",
     craft: "Woodworker",
     location: "Portland, OR",
@@ -88,10 +91,14 @@ export default function ArtisanSpotlight() {
                       {artisan.story}
                     </p>
 
-                    {/* Actions */}
+                    {/* Actions - FIXED with template strings */}
                     <div className="flex gap-4">
-                      <Button variant="outline">View Profile</Button>
-                      <Button>Shop Collection</Button>
+                      <Link href={`/artisans/${artisan.id}`}>
+                        <Button variant="outline">View Profile</Button>
+                      </Link>
+                      <Link href={`/marketplace?artisan=${artisan.id}`}>
+                        <Button>Shop Collection</Button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -109,9 +116,12 @@ export default function ArtisanSpotlight() {
             <p className="text-muted-foreground mb-8">
               Join our community of artisans and start selling your handmade creations today.
             </p>
-            <Button size="lg" className="px-8">
-              Become an Artisan
-            </Button>
+            <Link href="/become-artisan">
+              <Button size="lg" className="px-8 group">
+                Become an Artisan
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

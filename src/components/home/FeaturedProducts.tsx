@@ -1,4 +1,4 @@
-import ProductCard from '../../../components/product/ProductCard'
+﻿import ProductCard from '../../../components/product/ProductCard'
 import Link from 'next/link';
 import { Award, Shield, Truck, Users } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ const products = [
     originalPrice: 185.00,
     rating: 4.8,
     reviews: 42,
-    image: "/images/artisans/pottery1.jpg",
+    image: "/images/artisans/bowl-set.avif",
     artisan: "Elena Rodriguez",
     artisanSince: "2010",
     artisanImage: "/images/artisans/elena.jpg",
@@ -31,7 +31,7 @@ const products = [
     originalPrice: 950.00,
     rating: 4.9,
     reviews: 38,
-    image: "/images/artisans/woodwork1.jpg",
+    image: "/images/artisans/table.avif",
     artisan: "James Wilson",
     artisanSince: "2008",
     artisanImage: "/images/artisans/james.jpg",
@@ -49,7 +49,7 @@ const products = [
     originalPrice: 225.00,
     rating: 4.7,
     reviews: 56,
-    image: "/images/artisans/jewelry1.jpg",
+    image: "/images/artisans/silver.avif",
     artisan: "Sophia Chen",
     artisanSince: "2015",
     artisanImage: "/images/artisans/sophia.jpg",
@@ -67,7 +67,7 @@ const products = [
     originalPrice: 195.00,
     rating: 4.6,
     reviews: 87,
-    image: "/images/artisans/pottery2.jpg",
+    image: "/images/artisans/mug.avif",
     artisan: "Elena Rodriguez",
     artisanSince: "2010",
     artisanImage: "/images/artisans/elena.jpg",
@@ -85,7 +85,7 @@ const products = [
     originalPrice: 150.00,
     rating: 4.8,
     reviews: 94,
-    image: "/images/artisans/woodwork2.jpg",
+    image: "/images/artisans/boards.jpg",
     artisan: "James Wilson",
     artisanSince: "2008",
     artisanImage: "/images/artisans/james.jpg",
@@ -103,7 +103,7 @@ const products = [
     originalPrice: 295.00,
     rating: 4.9,
     reviews: 63,
-    image: "/images/artisans/jewelry2.jpg",
+    image: "/images/artisans/gold.avif",
     artisan: "Sophia Chen",
     artisanSince: "2015",
     artisanImage: "/images/artisans/sophia.jpg",
@@ -146,7 +146,7 @@ export default function FeaturedProducts() {
           </div>
         </div>
 
-        {/* Products Grid - Using ProductCard */}
+        {/* Products Grid - Using ProductCard without outer Link wrapper */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
@@ -155,7 +155,11 @@ export default function FeaturedProducts() {
 
         {/* View All Button */}
         <div className="text-center mt-16">
-          <Link href="/marketplace"><Button size="lg" variant="outline" className="border-primary text-primary px-8">View All 200+ Products</Button></Link>
+          <Link href="/marketplace">
+            <Button size="lg" variant="outline" className="border-primary text-primary px-8 hover:bg-primary hover:text-white transition-all duration-300">
+              View All 200+ Products
+            </Button>
+          </Link>
           <p className="mt-4 text-text/60 text-sm">
             Free shipping on orders over $100 • 30-day return policy
           </p>

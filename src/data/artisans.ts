@@ -211,13 +211,15 @@ export const artisans: Artisan[] = [
 ];
 
 export function getArtisanBySlug(slug: string): Artisan | undefined {
-  return artisans.find(a => a.slug === slug);
+  return artisans.find(artisan => artisan.slug === slug);
 }
 
 export function getFeaturedArtisans(): Artisan[] {
-  return artisans.filter(a => a.isFeatured);
+  return artisans.filter(artisan => artisan.isFeatured);
 }
 
 export function getArtisansBySpecialty(specialty: string): Artisan[] {
-  return artisans.filter(a => a.specialty.toLowerCase().includes(specialty.toLowerCase()));
+  return artisans.filter(artisan => 
+    artisan.specialty.toLowerCase().includes(specialty.toLowerCase())
+  );
 }

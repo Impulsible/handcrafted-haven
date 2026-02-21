@@ -1,6 +1,5 @@
 ﻿'use client'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingBag, Star, Heart } from 'lucide-react'
@@ -18,6 +17,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart()
   const [isAdding, setIsAdding] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   const handleAddToCart = () => {
     setIsAdding(true)
@@ -47,15 +47,27 @@ export default function ProductCard({ product }: ProductCardProps) {
     toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist')
   }
 
+  // Fallback image path - use one of your existing images
+  const fallbackImage = '/images/artisans/pottery.jpg'
+
   return (
     <div className="group relative bg-card border border-primary/10 rounded-2xl overflow-hidden card-hover">
       {/* Product Image */}
       <Link href={`/products/${product.id}`}>
-        <div className="relative h-64 w-full overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 z-10" />
-          <div className="relative h-full w-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-            <ShoppingBag className="h-16 w-16 text-primary/40" />
-          </div>
+        <div className="relative h-64 w-full overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+          {/* Actual Product Image */}
+          <Image
+            src={imageError ? fallbackImage : product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={() => setImageError(true)}
+            priority={false}
+          />
+          
+          {/* Optional overlay gradient for better text visibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           
           {/* Wishlist Button */}
           <button
@@ -65,8 +77,22 @@ export default function ProductCard({ product }: ProductCardProps) {
             }}
             className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
           >
-            <Heart className="h-5 w-5" />
+            <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
           </button>
+
+          {/* Discount Badge (if applicable) */}
+          {product.discount && product.discount > 0 && (
+            <div className="absolute top-4 left-4 z-20 px-3 py-1 bg-secondary text-white text-sm font-semibold rounded-full">
+              {product.discount}% OFF
+            </div>
+          )}
+
+          {/* Best Seller Badge (if applicable) */}
+          {product.bestSeller && (
+            <div className="absolute top-4 left-4 z-20 px-3 py-1 bg-accent text-white text-sm font-semibold rounded-full">
+              Best Seller
+            </div>
+          )}
 
           {/* Quick Add Button (visible on hover) */}
           <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
@@ -96,7 +122,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               <p className="text-sm text-muted-foreground">by {product.artisan}</p>
             </div>
             <span className="text-lg font-bold text-primary">
-              
+              ${product.price}
             </span>
           </div>
 
@@ -126,11 +152,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           className="w-full mt-4 bg-gradient-to-r from-primary to-secondary"
         >
           <ShoppingBag className="h-4 w-4 mr-2" />
-          Add to Cart
+          Add to Cart - ${product.price}
         </Button>
       </div>
     </div>
   )
 }
-
-

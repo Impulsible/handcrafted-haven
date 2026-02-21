@@ -1,4 +1,6 @@
-﻿"use client";
+﻿/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -24,7 +26,20 @@ import {
   LogOut,
   Settings,
   CreditCard,
-  ChevronDown
+  ChevronDown,
+  LayoutDashboard,
+  Star,
+  Clock,
+  Award,
+  TrendingUp,
+  Bell,
+  HelpCircle,
+  LogIn,
+  UserCircle,
+  Bookmark,
+  MapPin as MapPinIcon,
+  Shield,
+  Truck
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,7 +51,7 @@ import CartIcon from "@/components/cart/CartIcon";
 
 // Promo messages
 const promoMessages = [
-  { id: 1, text: '✨ Free Shipping on Orders Over ', type: 'shipping' },
+  { id: 1, text: '✨ Free Shipping on Orders Over $50', type: 'shipping' },
   { id: 2, text: '🎨 New Artisan Collection Just Dropped', type: 'new' },
   { id: 3, text: '🌟 Artisan Spotlight: Meet Our Featured Creator', type: 'spotlight' },
   { id: 4, text: '⚡ Flash Sale: 24 Hours Only - 30% Off Textiles', type: 'sale' },
@@ -118,15 +133,18 @@ const navigationItems: NavItem[] = [
   }
 ];
 
-// Mock user data
-const mockUser = {
-  isLoggedIn: false,
-  name: "Alex Johnson",
-  email: "alex@example.com",
-  avatar: "AJ",
-  orders: 3,
-  wishlistItems: 12
-};
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  is_artisan: boolean;
+  created_at: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+}
 
 export default function Header() {
   const pathname = usePathname();
@@ -140,9 +158,66 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    orders: 0,
+    wishlistItems: 0,
+    reviews: 0,
+    artisanProducts: 0
+  });
 
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+
+  // Check session on mount
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    try {
+      const response = await fetch('/api/auth/session');
+      const data = await response.json();
+      if (data.authenticated) {
+        setUser(data.user);
+        fetchUserStats(data.user.id);
+      }
+    } catch (error) {
+      console.error('Session check failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchUserStats = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/user/stats?userId=${userId}`);
+      const data = await response.json();
+      if (data.success) {
+        setStats(data.stats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user stats:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/signout', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message);
+        setUser(null);
+        setIsUserMenuOpen(false);
+        router.push('/');
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error('Failed to sign out');
+    }
+  };
 
   // Auto-rotate promo messages
   useEffect(() => {
@@ -170,7 +245,6 @@ export default function Header() {
       if (!(event.target as Element).closest('.dropdown-container')) {
         setActiveDropdown(null);
         setIsUserMenuOpen(false);
-        
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -211,17 +285,15 @@ export default function Header() {
     }
   };
 
-  
-  // User menu handlers
-  const handleLogin = () => {
-    toast.success("Welcome back! Redirecting to dashboard...");
-    setIsUserMenuOpen(false);
-    router.push('/auth/signin');
-  };
-
-  const handleLogout = () => {
-    toast.info("Logged out successfully");
-    setIsUserMenuOpen(false);
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user?.name) return '?';
+    return user.name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
@@ -393,13 +465,13 @@ export default function Header() {
 
               {/* Wishlist */}
               <button
-                onClick={() => handleFavoriteAction("view")}
+                onClick={() => router.push('/dashboard/wishlist')}
                 className="p-2 hover:bg-accent/10 rounded-full transition-colors hidden sm:inline-flex relative group"
               >
                 <Heart className="h-4.5 w-4.5 text-foreground group-hover:scale-110 transition-transform" />
-                {mockUser.wishlistItems > 0 && (
+                {stats.wishlistItems > 0 && (
                   <span className="absolute -top-1 -right-1 h-4.5 w-4.5 rounded-full bg-accent text-white text-[11px] flex items-center justify-center font-bold shadow-sm">
-                    {mockUser.wishlistItems > 9 ? '9+' : mockUser.wishlistItems}
+                    {stats.wishlistItems > 9 ? '9+' : stats.wishlistItems}
                   </span>
                 )}
               </button>
@@ -409,75 +481,174 @@ export default function Header() {
 
               {/* User Menu */}
               <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-2 rounded-lg hover:bg-primary/5 transition-colors group"
-                >
-                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                    <span className="text-white text-sm font-bold">
-                      {mockUser.isLoggedIn ? mockUser.avatar : '?'}
+                {!isLoading && (
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="hidden sm:flex items-center gap-1.5 px-2.5 py-2 rounded-lg hover:bg-primary/5 transition-colors group"
+                  >
+                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">
+                        {user ? getUserInitials() : '?'}
+                      </span>
+                    </div>
+                    <span className="text-[15px] font-medium max-w-[100px] truncate">
+                      {user ? user.name.split(' ')[0] : 'Sign In'}
                     </span>
-                  </div>
-                  <span className="text-[15px] font-medium">
-                    {mockUser.isLoggedIn ? mockUser.name : 'Sign In'}
-                  </span>
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                )}
 
                 {/* User Menu Dropdown */}
                 {isUserMenuOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-64 bg-background border border-primary/20 rounded-xl shadow-lg overflow-hidden z-50">
-                    {mockUser.isLoggedIn ? (
+                  <div className="absolute top-full right-0 mt-2 w-72 bg-background border border-primary/20 rounded-xl shadow-lg overflow-hidden z-50">
+                    {user ? (
                       <>
-                        <div className="p-4 border-b border-primary/10 bg-primary/5">
+                        {/* User Header */}
+                        <div className="p-4 border-b border-primary/10 bg-gradient-to-r from-primary/5 to-secondary/5">
                           <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                              <span className="text-white font-bold text-lg">
-                                {mockUser.avatar}
+                            <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                              <span className="text-white font-bold text-xl">
+                                {getUserInitials()}
                               </span>
                             </div>
-                            <div>
-                              <h3 className="font-semibold">{mockUser.name}</h3>
-                              <p className="text-sm text-muted-foreground truncate">
-                                {mockUser.email}
-                              </p>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg truncate">{user.name}</h3>
+                              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                              <div className="flex items-center gap-1 mt-1">
+                                <Badge variant="outline" className="text-xs">
+                                  {user.is_artisan ? 'Artisan' : 'Collector'}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  Member since {new Date(user.created_at).getFullYear()}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
                         </div>
 
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-primary">{stats.orders}</div>
+                            <div className="text-xs text-muted-foreground">Orders</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-primary">{stats.wishlistItems}</div>
+                            <div className="text-xs text-muted-foreground">Wishlist</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-primary">{stats.reviews}</div>
+                            <div className="text-xs text-muted-foreground">Reviews</div>
+                          </div>
+                        </div>
+
+                        {/* Menu Items */}
                         <div className="p-2">
+                          {/* Dashboard - Main Link */}
                           <Link
-                            href="/profile"
+                            href="/dashboard"
+                            className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors mb-2"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <LayoutDashboard className="h-5 w-5 text-primary" />
+                            <div className="flex-1">
+                              <span className="font-semibold text-primary">Dashboard</span>
+                              <p className="text-xs text-muted-foreground">Manage your account</p>
+                            </div>
+                          </Link>
+
+                          <div className="border-t border-primary/10 my-2"></div>
+
+                          <Link
+                            href="/dashboard/profile"
                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors"
                             onClick={() => setIsUserMenuOpen(false)}
                           >
-                            <User className="h-4 w-4 text-primary" />
+                            <UserCircle className="h-4 w-4 text-primary" />
                             <span>My Profile</span>
                           </Link>
+
                           <Link
-                            href="/orders"
+                            href="/dashboard/orders"
                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors"
                             onClick={() => setIsUserMenuOpen(false)}
                           >
                             <Package className="h-4 w-4 text-primary" />
-                            <span>My Orders ({mockUser.orders})</span>
+                            <span className="flex-1">My Orders</span>
+                            {stats.orders > 0 && (
+                              <Badge variant="secondary" className="text-xs">
+                                {stats.orders}
+                              </Badge>
+                            )}
                           </Link>
+
                           <Link
-                            href="/wishlist"
+                            href="/dashboard/wishlist"
                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors"
                             onClick={() => setIsUserMenuOpen(false)}
                           >
                             <Heart className="h-4 w-4 text-primary" />
-                            <span>Wishlist ({mockUser.wishlistItems})</span>
+                            <span className="flex-1">Wishlist</span>
+                            {stats.wishlistItems > 0 && (
+                              <Badge variant="secondary" className="text-xs">
+                                {stats.wishlistItems}
+                              </Badge>
+                            )}
                           </Link>
+
                           <Link
-                            href="/settings"
+                            href="/dashboard/reviews"
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Star className="h-4 w-4 text-primary" />
+                            <span className="flex-1">My Reviews</span>
+                            {stats.reviews > 0 && (
+                              <Badge variant="secondary" className="text-xs">
+                                {stats.reviews}
+                              </Badge>
+                            )}
+                          </Link>
+
+                          <Link
+                            href="/dashboard/addresses"
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <MapPinIcon className="h-4 w-4 text-primary" />
+                            <span>Addresses</span>
+                          </Link>
+
+                          <Link
+                            href="/dashboard/settings"
                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors"
                             onClick={() => setIsUserMenuOpen(false)}
                           >
                             <Settings className="h-4 w-4 text-primary" />
                             <span>Settings</span>
                           </Link>
+
+                          {user.is_artisan && (
+                            <>
+                              <div className="border-t border-primary/10 my-2"></div>
+                              <Link
+                                href="/dashboard/artisan"
+                                className="flex items-center gap-3 p-3 rounded-lg bg-secondary/5 hover:bg-secondary/10 transition-colors"
+                                onClick={() => setIsUserMenuOpen(false)}
+                              >
+                                <Award className="h-4 w-4 text-secondary" />
+                                <span className="flex-1">Artisan Studio</span>
+                                {stats.artisanProducts > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {stats.artisanProducts}
+                                  </Badge>
+                                )}
+                              </Link>
+                            </>
+                          )}
+
+                          <div className="border-t border-primary/10 my-2"></div>
+
                           <button
                             onClick={handleLogout}
                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-destructive/10 w-full text-left transition-colors text-destructive"
@@ -489,27 +660,40 @@ export default function Header() {
                       </>
                     ) : (
                       <>
-                        <div className="p-4 border-b border-primary/10 bg-primary/5">
-                          <h3 className="font-semibold text-primary">Welcome!</h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Sign in to access your account
+                        <div className="p-6 text-center">
+                          <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto mb-4">
+                            <User className="h-8 w-8 text-white" />
+                          </div>
+                          <h3 className="font-semibold text-lg mb-1">Welcome!</h3>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            Sign in to access your dashboard and manage your account
                           </p>
-                        </div>
-
-                        <div className="p-4">
                           <Button
-                            className="w-full mb-3 bg-gradient-to-r from-primary to-secondary"
-                            onClick={handleLogin}
+                            className="w-full mb-2 bg-gradient-to-r from-primary to-secondary"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              router.push('/auth/signin');
+                            }}
                           >
+                            <LogIn className="h-4 w-4 mr-2" />
                             Sign In
                           </Button>
                           <Link
-                            href="/auth/register"
-                            className="block w-full text-center text-sm text-primary hover:underline"
+                            href="/auth/signup"
+                            className="block w-full text-sm text-primary hover:underline"
                             onClick={() => setIsUserMenuOpen(false)}
                           >
                             Create an account
                           </Link>
+                        </div>
+
+                        <div className="border-t border-primary/10 p-4">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>New here?</span>
+                            <Link href="/about" className="text-primary hover:underline">
+                              Learn more
+                            </Link>
+                          </div>
                         </div>
                       </>
                     )}
@@ -596,6 +780,47 @@ export default function Header() {
 
             {/* Mobile Navigation */}
             <div className="p-5">
+              {/* User Section for Mobile */}
+              {user && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">{getUserInitials()}</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{user.name}</h3>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <Link
+                      href="/dashboard"
+                      className="p-2 rounded-lg bg-background/50 hover:bg-background transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="h-4 w-4 mx-auto mb-1 text-primary" />
+                      <span className="text-xs">Dashboard</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/orders"
+                      className="p-2 rounded-lg bg-background/50 hover:bg-background transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Package className="h-4 w-4 mx-auto mb-1 text-primary" />
+                      <span className="text-xs">Orders</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/wishlist"
+                      className="p-2 rounded-lg bg-background/50 hover:bg-background transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Heart className="h-4 w-4 mx-auto mb-1 text-primary" />
+                      <span className="text-xs">Wishlist</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               <nav className="space-y-1.5">
                 {navigationItems.map((item) => {
                   const active = isActive(item.href);
@@ -626,22 +851,6 @@ export default function Header() {
                 <div className="h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
               </div>
 
-              {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-3.5 mb-7">
-                <div className="text-center p-4 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors">
-                  <div className="text-xl font-bold text-primary">{itemCount}</div>
-                  <div className="text-xs text-muted-foreground">Items</div>
-                </div>
-                <div className="text-center p-4 rounded-xl bg-secondary/5 hover:bg-secondary/10 transition-colors">
-                  <div className="text-xl font-bold text-secondary">${totalPrice.toFixed(2)}</div>
-                  <div className="text-xs text-muted-foreground">Total</div>
-                </div>
-                <div className="text-center p-4 rounded-xl bg-accent/5 hover:bg-accent/10 transition-colors">
-                  <div className="text-xl font-bold text-accent">{mockUser.wishlistItems}</div>
-                  <div className="text-xs text-muted-foreground">Wishlist</div>
-                </div>
-              </div>
-
               {/* Quick Actions */}
               <div className="space-y-3.5 mb-7">
                 <Button
@@ -667,54 +876,40 @@ export default function Header() {
                 </Button>
               </div>
 
-              {/* User Section */}
-              <div className="rounded-xl p-5 mb-7 bg-gradient-to-r from-primary/5 to-transparent">
-                {mockUser.isLoggedIn ? (
-                  <>
-                    <div className="flex items-center space-x-3">
-                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">{mockUser.avatar}</span>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-foreground text-sm">{mockUser.name}</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">{mockUser.email}</p>
-                      </div>
+              {/* Auth Section for Mobile */}
+              {!user && (
+                <div className="rounded-xl p-5 mb-7 bg-gradient-to-r from-primary/5 to-transparent">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                      <User className="h-5 w-5 text-white" />
                     </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-foreground text-sm">Welcome!</h3>
+                      <p className="text-xs text-muted-foreground">Sign in to your account</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      className="bg-gradient-to-r from-primary to-secondary"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        router.push('/auth/signin');
+                      }}
+                    >
+                      Sign In
+                    </Button>
                     <Button
                       variant="outline"
-                      className="w-full mt-3.5"
                       onClick={() => {
                         setIsMobileMenuOpen(false);
-                        handleLogout();
+                        router.push('/auth/signup');
                       }}
                     >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
+                      Register
                     </Button>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center space-x-3">
-                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                        <User className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-foreground text-sm">Welcome!</h3>
-                        <p className="text-xs text-muted-foreground">Sign in to your account</p>
-                      </div>
-                    </div>
-                    <Button
-                      className="w-full mt-3.5 bg-gradient-to-r from-primary to-secondary"
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        handleLogin();
-                      }}
-                    >
-                      Sign In / Register
-                    </Button>
-                  </>
-                )}
-              </div>
+                  </div>
+                </div>
+              )}
 
               {/* Contact Info */}
               <div className="space-y-3.5">
@@ -743,7 +938,7 @@ export default function Header() {
                   Handcrafted Haven {APP_VERSION}
                 </p>
                 <p className="text-[10px] text-muted-foreground/60">
-                  Ãƒâ€šÃ‚Â© {new Date().getFullYear()} All artisan works are authentic and handmade
+                  © {new Date().getFullYear()} All artisan works are authentic and handmade
                 </p>
               </div>
             </div>
@@ -753,10 +948,3 @@ export default function Header() {
     </>
   );
 }
-
-
-
-
-
-
-

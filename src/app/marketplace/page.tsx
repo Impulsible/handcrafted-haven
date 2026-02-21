@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -932,7 +932,14 @@ export default function MarketplacePage() {
                 {viewMode === "grid" ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                     {currentItems.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                      <ProductCard 
+  key={product.id} 
+  product={{
+    ...product,
+    artisanSince: product.artisanSince || "2020",
+    artisanImage: product.artisanImage || "/images/default-artisan.jpg"
+  }} 
+/>
                     ))}
                   </div>
                 ) : (

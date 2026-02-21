@@ -1,4 +1,5 @@
-import Image from "next/image";
+﻿import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 
@@ -42,15 +43,19 @@ export default function HeroSection() {
             Each piece tells a story of dedication, tradition, and creative expression.
           </p>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons with Links */}
           <div className="flex flex-col sm:flex-row gap-4 animate-slide-up animation-delay-300">
-            <Button size="lg" className="group">
-              Explore Marketplace
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button size="lg" variant="outline">
-              Become an Artisan
-            </Button>
+            <Link href="/marketplace">
+              <Button size="lg" className="group">
+                Explore Marketplace
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link href="/artisans">
+              <Button size="lg" variant="outline">
+                Meet Our Artisans
+              </Button>
+            </Link>
           </div>
 
           {/* Stats */}

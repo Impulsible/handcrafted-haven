@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Palette, Gem, TreePine, Scissors, ChevronRight, Sparkles } from "lucide-react";
@@ -6,9 +6,10 @@ import { Palette, Gem, TreePine, Scissors, ChevronRight, Sparkles } from "lucide
 const categories = [
   {
     name: "Pottery",
+    slug: "pottery",
     description: "Hand-thrown ceramics & functional art",
     icon: <Palette className="h-8 w-8" />,
-    image: "/images/artisans/pottery.jpg",
+    image: "/images/artisans/pottery1.avif",
     count: "250+ items",
     color: "from-primary/20 to-secondary/20",
     gradient: "from-primary to-secondary",
@@ -16,9 +17,10 @@ const categories = [
   },
   {
     name: "Jewelry",
+    slug: "jewelry",
     description: "Fine craftsmanship with precious materials",
     icon: <Gem className="h-8 w-8" />,
-    image: "/images/artisans/jewelry.jpg",
+    image: "/images/artisans/jewelry1.avif",
     count: "300+ items",
     color: "from-amber-100/30 to-yellow-100/30",
     gradient: "from-amber-500 to-yellow-500",
@@ -26,6 +28,7 @@ const categories = [
   },
   {
     name: "Woodwork",
+    slug: "woodwork",
     description: "Sustainable wood crafted with precision",
     icon: <TreePine className="h-8 w-8" />,
     image: "/images/artisans/woodwork.jpg",
@@ -36,6 +39,7 @@ const categories = [
   },
   {
     name: "Textiles",
+    slug: "textiles",
     description: "Woven, embroidered, and dyed fabrics",
     icon: <Scissors className="h-8 w-8" />,
     image: "/images/artisans/textiles.jpg",
@@ -67,12 +71,12 @@ export default function CategoryShowcase() {
         {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {categories.map((category) => (
-            <Link
+            <div
               key={category.name}
-              href={`/category/${category.name.toLowerCase()}`}
-              className="group block"
+              className="group block bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-organic-lg transition-all duration-500 hover:-translate-y-2 h-full"
             >
-              <div className="bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-organic-lg transition-all duration-500 hover:-translate-y-2 h-full">
+              {/* Make the entire card clickable by wrapping content in a Link */}
+              <Link href={`/categories/${category.slug}`} className="block h-full">
                 {/* Category Header */}
                 <div className="p-6 pb-0">
                   <div className="flex items-center justify-between mb-4">
@@ -103,7 +107,7 @@ export default function CategoryShowcase() {
                   {/* Badge */}
                   <div className="absolute top-3 right-3">
                     <div className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full">
-                      <span className="text-xs font-semibold bg-gradient-to-r bg-clip-text text-transparent ${category.gradient}">
+                      <span className={`text-xs font-semibold bg-gradient-to-r ${category.gradient} bg-clip-text text-transparent`}>
                         Featured
                       </span>
                     </div>
@@ -134,33 +138,33 @@ export default function CategoryShowcase() {
                     </div>
                   </div>
 
-                  {/* Browse Button */}
-                  <Button
-                    variant="outline"
-                    className="w-full border-primary/30 text-primary hover:bg-primary/10 group-hover:border-primary group-hover:bg-primary/10"
+                  {/* Browse Button - Now just a visual button without nested Link */}
+                  <div
+                    className="w-full border border-primary/30 text-primary bg-transparent hover:bg-primary/10 px-4 py-2 rounded-lg font-medium text-center cursor-pointer transition-colors"
                   >
                     Browse Collection
-                  </Button>
+                  </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            </div>
           ))}
         </div>
 
-        {/* View All Categories */}
+        {/* View All Categories - Links to main categories page */}
         <div className="text-center mt-16">
           <div className="inline-flex flex-col items-center">
             <p className="text-text/60 mb-6 max-w-lg mx-auto">
               From functional pottery to statement jewelry, explore thousands of unique handmade pieces
             </p>
-            <Button size="lg" className="bg-primary hover:bg-primary/90 px-8">
-              View All Categories
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
+            <Link href="/categories">
+              <Button size="lg" className="bg-primary hover:bg-primary/90 px-8">
+                View All Categories
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
     </section>
   );
 }
-

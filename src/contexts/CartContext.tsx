@@ -1,10 +1,10 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+﻿/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 
 export interface CartItem {
-  [x: string]: ReactNode
+  artisan: ReactNode
   id: number
   name: string
   price: number
@@ -28,17 +28,20 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on mount - using a ref to track initial mount
   useEffect(() => {
     const savedCart = localStorage.getItem('cart')
     if (savedCart) {
       try {
-        setItems(JSON.parse(savedCart))
+        const parsedCart = JSON.parse(savedCart)
+        setItems(parsedCart)
       } catch (error) {
         console.error('Failed to parse cart:', error)
       }
     }
-  }, [])
+    
+     
+  }, []) // Empty dependency array is correct for one-time initialization
 
   // Save to localStorage whenever cart changes
   useEffect(() => {
@@ -50,10 +53,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const existing = prev.find((i) => i.id === item.id)
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
+          i.id === item.id ? { ...i, quantity: i.quantity + (item.quantity || 1) } : i
         )
       }
-      return [...prev, item]
+      return [...prev, { ...item, quantity: item.quantity || 1 }]
     })
   }
 

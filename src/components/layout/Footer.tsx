@@ -1,8 +1,14 @@
-﻿import Link from "next/link";
+﻿/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react/no-unescaped-entities */
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 import { 
   Facebook, Twitter, Instagram, Youtube, Heart, 
   Mail, Phone, MapPin, CreditCard, Shield, Truck, Users,
-  ShoppingBag
+  ShoppingBag, Loader2, CheckCircle
 } from "lucide-react";
 
 const footerLinks = {
@@ -58,6 +64,53 @@ const trustBadges = [
 ];
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast.error('Please enter your email');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setIsSubscribed(true);
+        setEmail('');
+        toast.success(data.message || 'Successfully subscribed!');
+      } else {
+        toast.error(data.error || 'Subscription failed');
+      }
+    } catch (error) {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <footer className="bg-gradient-to-b from-background to-primary/5 border-t border-primary/20 mt-auto">
       {/* Main Footer */}
@@ -83,19 +136,37 @@ export default function Footer() {
               Each piece tells a story of craftsmanship, passion, and dedication to traditional techniques.
             </p>
             
-            {/* Newsletter Signup */}
+            {/* Newsletter Signup - Fully Functional */}
             <div className="mb-8">
               <h3 className="font-semibold text-foreground mb-3">Join Our Community</h3>
-              <div className="flex flex-col sm:flex-row gap-2">
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
-                  className="flex-1 px-4 py-2 rounded-lg border border-primary/20 bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                  className="flex-1 px-4 py-2 rounded-lg border border-primary/20 bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all disabled:opacity-50"
+                  disabled={isLoading || isSubscribed}
                 />
-                <button className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
-                  Subscribe
+                <button
+                  type="submit"
+                  disabled={isLoading || isSubscribed}
+                  className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
+                >
+                  {isLoading ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Subscribing</>
+                  ) : isSubscribed ? (
+                    <><CheckCircle className="h-4 w-4 mr-2" /> Subscribed</>
+                  ) : (
+                    'Subscribe'
+                  )}
                 </button>
-              </div>
+              </form>
+              {isSubscribed && (
+                <p className="text-xs text-green-600 dark:text-green-400 mt-2 flex items-center">
+                  <CheckCircle className="h-3 w-3 mr-1" /> You're subscribed! Check your inbox.
+                </p>
+              )}
               <p className="text-xs text-muted-foreground mt-2">
                 Get updates on new arrivals, exclusive offers, and artisan stories.
               </p>
@@ -222,4 +293,3 @@ export default function Footer() {
     </footer>
   );
 }
-
