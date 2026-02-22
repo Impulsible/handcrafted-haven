@@ -9,7 +9,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password, rememberMe } = body;
 
-    // Validate input
+    console.log('🔵 Signin attempt for email:', email);
+
     if (!email || !password) {
       return NextResponse.json(
         { success: false, error: 'Email and password are required' },
@@ -22,9 +23,10 @@ export async function POST(request: Request) {
       .from('users')
       .select('*')
       .eq('email', email.toLowerCase())
-      .single();
+      .maybeSingle();
 
     if (fetchError || !user) {
+      console.log('❌ User not found:', email.toLowerCase());
       return NextResponse.json(
         { success: false, error: 'Invalid email or password' },
         { status: 401 }
@@ -42,6 +44,7 @@ export async function POST(request: Request) {
     // Verify password
     const isValidPassword = await comparePassword(password, user.password);
     if (!isValidPassword) {
+      console.log('❌ Invalid password for user:', email);
       return NextResponse.json(
         { success: false, error: 'Invalid email or password' },
         { status: 401 }
@@ -58,16 +61,16 @@ export async function POST(request: Request) {
     const ipAddress = headersList.get('x-forwarded-for') || 'unknown';
     const userAgent = headersList.get('user-agent') || 'unknown';
 
-    const { token, expiresAt } = await createSession(user.id, ipAddress, userAgent);
+    const { token } = await createSession(user.id, ipAddress, userAgent);
 
-    // Set cookie
+    // Set cookie with proper options
     (await
-          // Set cookie
-          cookies()).set('session_token', token, {
+      // Set cookie with proper options
+      cookies()).set('session_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7, // 30 days if remember, 7 if not
+      sameSite: 'lax',
+      maxAge: rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7,
       path: '/',
     });
 
@@ -80,14 +83,17 @@ export async function POST(request: Request) {
     // Return user data (excluding password)
     const { password: _, ...userWithoutPassword } = user;
 
+    console.log('✅ Signin successful for:', user.email);
+
     return NextResponse.json({
       success: true,
       message: 'Signed in successfully',
       user: userWithoutPassword,
+      redirect: '/dashboard'
     });
 
   } catch (error) {
-    console.error('Signin error:', error);
+    console.error('❌ Signin error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

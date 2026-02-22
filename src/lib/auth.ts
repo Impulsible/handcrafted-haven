@@ -1,14 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { supabase } from './supabase';
 
+const SALT_ROUNDS = 10;
+
 export const hashPassword = async (password: string): Promise<string> => {
-  return await bcrypt.hash(password, 10);
+  try {
+    const salt = await bcrypt.genSalt(SALT_ROUNDS);
+    const hash = await bcrypt.hash(password, salt);
+    return hash;
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    throw new Error('Failed to hash password');
+  }
 };
 
 export const comparePassword = async (password: string, hash: string): Promise<boolean> => {
-  return await bcrypt.compare(password, hash);
+  try {
+    return await bcrypt.compare(password, hash);
+  } catch (error) {
+    console.error('Error comparing passwords:', error);
+    return false;
+  }
 };
 
 export const generateToken = (): string => {
@@ -20,7 +33,7 @@ export const createSession = async (userId: string, ipAddress?: string, userAgen
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('user_sessions')
     .insert([
       {

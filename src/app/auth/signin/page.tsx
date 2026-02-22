@@ -50,14 +50,14 @@ export default function SignInPage() {
 
       if (response.ok && data.success) {
         toast.success(data.message);
-        router.push('/');
-        router.refresh();
+        // Force a hard navigation to ensure cookies are set and page reloads
+        window.location.href = '/dashboard';
       } else {
         toast.error(data.error || 'Sign in failed');
+        setIsLoading(false);
       }
     } catch (error) {
       toast.error('Something went wrong. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -84,7 +84,7 @@ export default function SignInPage() {
         </div>
 
         {/* Sign In Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} autoComplete="off">
           <div className="space-y-4">
             {/* Email Field */}
             <div>
@@ -101,7 +101,7 @@ export default function SignInPage() {
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full pl-10 pr-3 py-3 rounded-lg border border-primary/20 bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                  placeholder="you@example.com"
+                  placeholder="your@email.com"
                   disabled={isLoading}
                 />
               </div>
@@ -122,7 +122,7 @@ export default function SignInPage() {
                   value={formData.password}
                   onChange={handleChange}
                   className="w-full pl-10 pr-10 py-3 rounded-lg border border-primary/20 bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   disabled={isLoading}
                 />
                 <button

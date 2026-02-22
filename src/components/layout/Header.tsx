@@ -1,5 +1,4 @@
 ﻿/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -29,24 +28,15 @@ import {
   ChevronDown,
   LayoutDashboard,
   Star,
-  Clock,
   Award,
-  TrendingUp,
-  Bell,
-  HelpCircle,
   LogIn,
-  UserCircle,
-  Bookmark,
-  MapPin as MapPinIcon,
-  Shield,
-  Truck
+  UserCircle
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from '@/contexts/CartContext';
-import { useFavorite } from '@/hooks/useFavorite';
 import CartIcon from "@/components/cart/CartIcon";
 
 // Promo messages
@@ -140,17 +130,12 @@ interface User {
   avatar?: string;
   is_artisan: boolean;
   created_at: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  country?: string;
 }
 
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { items, totalPrice } = useCart();
-  const { handleFavoriteAction } = useFavorite();
 
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -163,27 +148,33 @@ export default function Header() {
   const [stats, setStats] = useState({
     orders: 0,
     wishlistItems: 0,
-    reviews: 0,
-    artisanProducts: 0
+    reviews: 0
   });
 
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
-  // Check session on mount
+  // Check session on mount and when route changes
   useEffect(() => {
     checkSession();
-  }, []);
+  }, [pathname]); // Re-check when route changes
 
   const checkSession = async () => {
     try {
-      const response = await fetch('/api/auth/session');
+      const response = await fetch('/api/auth/session', {
+        credentials: 'include' // Important: include cookies
+      });
       const data = await response.json();
       if (data.authenticated) {
         setUser(data.user);
-        fetchUserStats(data.user.id);
+        if (data.user) {
+          fetchUserStats(data.user.id);
+        }
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error('Session check failed:', error);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -197,7 +188,7 @@ export default function Header() {
         setStats(data.stats);
       }
     } catch (error) {
-      console.error('Failed to fetch user stats:', error);
+      console.error('Failed to fetch stats:', error);
     }
   };
 
@@ -214,11 +205,47 @@ export default function Header() {
         router.push('/');
         router.refresh();
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Failed to sign out');
     }
   };
 
+useEffect(() => {
+  checkSession();
+  
+  // Also check when the page becomes visible (user returns to tab)
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      checkSession();
+    }
+  };
+  
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+  return () => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  };
+}, []);
+
+  // Add this useEffect to your Header component
+useEffect(() => {
+  checkSession();
+  
+  // Listen for storage events (for multi-tab support)
+  const handleStorageChange = (e: StorageEvent) => {
+    if (e.key === 'profile-updated') {
+      checkSession();
+    }
+  };
+  
+  window.addEventListener('storage', handleStorageChange);
+  
+  return () => {
+    window.removeEventListener('storage', handleStorageChange);
+  };
+}, []);
+  
   // Auto-rotate promo messages
   useEffect(() => {
     const interval = setInterval(() => {
@@ -544,7 +571,6 @@ export default function Header() {
 
                         {/* Menu Items */}
                         <div className="p-2">
-                          {/* Dashboard - Main Link */}
                           <Link
                             href="/dashboard"
                             className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors mb-2"
@@ -615,7 +641,7 @@ export default function Header() {
                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors"
                             onClick={() => setIsUserMenuOpen(false)}
                           >
-                            <MapPinIcon className="h-4 w-4 text-primary" />
+                            <MapPin className="h-4 w-4 text-primary" />
                             <span>Addresses</span>
                           </Link>
 
@@ -638,11 +664,6 @@ export default function Header() {
                               >
                                 <Award className="h-4 w-4 text-secondary" />
                                 <span className="flex-1">Artisan Studio</span>
-                                {stats.artisanProducts > 0 && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    {stats.artisanProducts}
-                                  </Badge>
-                                )}
                               </Link>
                             </>
                           )}

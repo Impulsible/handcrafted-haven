@@ -14,7 +14,7 @@ import {
   ShoppingBag,
   Loader2,
   CheckCircle,
-  AlertCircle,
+  XCircle,
   ArrowRight
 } from "lucide-react";
 import { toast } from "sonner";
@@ -38,8 +38,7 @@ export default function SignUpPage() {
   const [passwordStrength, setPasswordStrength] = useState({
     hasMinLength: false,
     hasLetter: false,
-    hasNumber: false,
-    hasSpecial: false
+    hasNumber: false
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,13 +48,11 @@ export default function SignUpPage() {
       [name]: type === 'checkbox' ? checked : value
     }));
 
-    // Check password strength
     if (name === 'password') {
       setPasswordStrength({
         hasMinLength: value.length >= 8,
         hasLetter: /[A-Za-z]/.test(value),
-        hasNumber: /\d/.test(value),
-        hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(value)
+        hasNumber: /\d/.test(value)
       });
     }
   };
@@ -77,8 +74,7 @@ export default function SignUpPage() {
       return false;
     }
 
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passwordRegex.test(formData.password)) {
+    if (!passwordStrength.hasMinLength || !passwordStrength.hasLetter || !passwordStrength.hasNumber) {
       toast.error("Password must be at least 8 characters with at least one letter and one number");
       return false;
     }
@@ -157,7 +153,6 @@ export default function SignUpPage() {
           </p>
         </div>
 
-        {/* Sign Up Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             {/* Name Field */}
@@ -202,7 +197,7 @@ export default function SignUpPage() {
               </div>
             </div>
 
-            {/* Phone Field (Optional) */}
+            {/* Phone Field */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1">
                 Phone Number <span className="text-muted-foreground text-xs">(Optional)</span>
@@ -249,9 +244,40 @@ export default function SignUpPage() {
                 </button>
               </div>
               
+              {/* Password Requirements */}
+              <div className="mt-3 space-y-2">
+                <p className="text-sm font-medium">Password must contain:</p>
+                <div className="space-y-1">
+                  <div className={`flex items-center text-xs ${passwordStrength.hasMinLength ? 'text-green-500' : 'text-muted-foreground'}`}>
+                    {passwordStrength.hasMinLength ? (
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                    ) : (
+                      <XCircle className="h-3 w-3 mr-1" />
+                    )}
+                    At least 8 characters
+                  </div>
+                  <div className={`flex items-center text-xs ${passwordStrength.hasLetter ? 'text-green-500' : 'text-muted-foreground'}`}>
+                    {passwordStrength.hasLetter ? (
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                    ) : (
+                      <XCircle className="h-3 w-3 mr-1" />
+                    )}
+                    At least one letter
+                  </div>
+                  <div className={`flex items-center text-xs ${passwordStrength.hasNumber ? 'text-green-500' : 'text-muted-foreground'}`}>
+                    {passwordStrength.hasNumber ? (
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                    ) : (
+                      <XCircle className="h-3 w-3 mr-1" />
+                    )}
+                    At least one number
+                  </div>
+                </div>
+              </div>
+
               {/* Password Strength Indicator */}
               {formData.password && (
-                <div className="mt-2 space-y-2">
+                <div className="mt-2">
                   <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
                     <div 
                       className={`h-full ${getPasswordStrengthColor()} transition-all`}
@@ -259,17 +285,6 @@ export default function SignUpPage() {
                         width: `${[passwordStrength.hasMinLength, passwordStrength.hasLetter, passwordStrength.hasNumber].filter(Boolean).length * 33.33}%` 
                       }}
                     />
-                  </div>
-                  <div className="grid grid-cols-3 gap-1 text-xs">
-                    <div className={`flex items-center ${passwordStrength.hasMinLength ? 'text-green-500' : 'text-muted-foreground'}`}>
-                      <CheckCircle className="h-3 w-3 mr-1" /> 8+ chars
-                    </div>
-                    <div className={`flex items-center ${passwordStrength.hasLetter ? 'text-green-500' : 'text-muted-foreground'}`}>
-                      <CheckCircle className="h-3 w-3 mr-1" /> Letter
-                    </div>
-                    <div className={`flex items-center ${passwordStrength.hasNumber ? 'text-green-500' : 'text-muted-foreground'}`}>
-                      <CheckCircle className="h-3 w-3 mr-1" /> Number
-                    </div>
                   </div>
                 </div>
               )}
@@ -292,7 +307,9 @@ export default function SignUpPage() {
                   className={`w-full pl-10 pr-10 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all ${
                     formData.confirmPassword && formData.password !== formData.confirmPassword
                       ? 'border-red-500 bg-red-50'
-                      : 'border-primary/20 bg-background focus:border-primary'
+                      : formData.confirmPassword && formData.password === formData.confirmPassword
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-primary/20 bg-background'
                   }`}
                   placeholder="••••••••"
                   disabled={isLoading}
@@ -306,8 +323,13 @@ export default function SignUpPage() {
                 </button>
               </div>
               {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                <p className="mt-1 text-xs text-red-500 flex items-center">
-                  <AlertCircle className="h-3 w-3 mr-1" /> Passwords do not match
+                <p className="mt-1 text-xs text-red-500">
+                  Passwords do not match
+                </p>
+              )}
+              {formData.confirmPassword && formData.password === formData.confirmPassword && formData.password && (
+                <p className="mt-1 text-xs text-green-500">
+                  Passwords match
                 </p>
               )}
             </div>
@@ -353,7 +375,6 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          {/* Submit Button */}
           <Button
             type="submit"
             disabled={isLoading}
@@ -372,7 +393,6 @@ export default function SignUpPage() {
             )}
           </Button>
 
-          {/* Sign In Link */}
           <div className="text-center mt-4">
             <span className="text-muted-foreground">Already have an account? </span>
             <Link

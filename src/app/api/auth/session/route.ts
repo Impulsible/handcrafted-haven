@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextResponse } from 'next/server';
 import { validateSession } from '@/lib/auth';
 import { cookies } from 'next/headers';
@@ -18,7 +17,9 @@ export async function GET() {
       return NextResponse.json({ authenticated: false });
     }
 
-    const { password: _, ...userWithoutPassword } = session.users;
+    // Extract user data from session
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...userWithoutPassword } = session.users;
 
     return NextResponse.json({
       authenticated: true,

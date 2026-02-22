@@ -12,7 +12,8 @@ import {
   Phone,
   Calendar,
   MapPin,
-  Globe
+  Globe,
+  CheckCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -81,21 +83,55 @@ export default function ProfilePage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setSaveSuccess(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    setSaveSuccess(false);
 
     try {
-      // Simulate API call - replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast.success('Profile updated successfully');
+      // Update user profile via API
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Update local user state with new data
+        setUser(prev => prev ? { ...prev, ...formData } : null);
+        
+        // Update the session cache by refreshing session
+        await refreshSession();
+        
+        toast.success('Profile updated successfully');
+        setSaveSuccess(true);
+        
+        // Auto-hide success message after 3 seconds
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        toast.error(data.error || 'Failed to update profile');
+      }
     } catch {
       toast.error('Failed to update profile');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const refreshSession = async () => {
+    try {
+      const response = await fetch('/api/auth/session');
+      const data = await response.json();
+      if (data.authenticated) {
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error('Failed to refresh session:', error);
     }
   };
 
@@ -280,12 +316,20 @@ export default function ProfilePage() {
                     />
                   </div>
 
+                  {/* Success Message */}
+                  {saveSuccess && (
+                    <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
+                      <CheckCircle className="h-5 w-5" />
+                      <span className="text-sm font-medium">Profile updated successfully!</span>
+                    </div>
+                  )}
+
                   {/* Submit Button */}
                   <div className="flex justify-end">
                     <Button
                       type="submit"
                       disabled={isSaving}
-                      className="bg-gradient-to-r from-primary to-secondary"
+                      className="bg-gradient-to-r from-primary to-secondary min-w-[120px]"
                     >
                       {isSaving ? (
                         <>
