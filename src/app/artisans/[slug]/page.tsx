@@ -24,8 +24,10 @@ import { Button } from '@/components/ui/button'
 import { artisans, getArtisanBySlug } from '@/data/artisans'
 import { products } from '@/data/products'
 
-export default async function ArtisanProfilePage({ params }: { params: { slug: string } }) {
-  const artisan = getArtisanBySlug(params.slug)
+export default async function ArtisanProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+  // Await the params to get the slug (Next.js 15 requirement)
+  const { slug } = await params
+  const artisan = getArtisanBySlug(slug)
   
   if (!artisan) {
     notFound()

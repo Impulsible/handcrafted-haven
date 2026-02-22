@@ -1,30 +1,12 @@
-﻿import Image from "next/image";
+﻿/* eslint-disable @typescript-eslint/no-unused-vars */
+import Image from "next/image";
 import Link from "next/link";
 import { Star, MapPin, Users, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { artisans, getFeaturedArtisans } from "@/data/artisans";
 
-const artisans = [
-  {
-    id: "elena-rodriguez",
-    name: "Elena Rodriguez",
-    craft: "Pottery Artist",
-    location: "Oaxaca, Mexico",
-    rating: 4.9,
-    products: 42,
-    story: "Specializing in traditional Zapotec pottery techniques passed down through generations.",
-    image: "/images/artisans/elena.jpg",
-  },
-  {
-    id: "james-watanabe",
-    name: "James Watanabe",
-    craft: "Woodworker",
-    location: "Portland, OR",
-    rating: 5.0,
-    products: 28,
-    story: "Creates sustainable furniture from reclaimed wood with Japanese joinery techniques.",
-    image: "/images/artisans/james.jpg",
-  },
-];
+// Use featured artisans from your data file
+const featuredArtisans = getFeaturedArtisans();
 
 export default function ArtisanSpotlight() {
   return (
@@ -41,9 +23,9 @@ export default function ArtisanSpotlight() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {artisans.map((artisan) => (
+          {featuredArtisans.map((artisan) => (
             <div
-              key={artisan.name}
+              key={artisan.id}
               className="bg-card border border-primary/10 rounded-2xl overflow-hidden card-hover"
             >
               <div className="p-8">
@@ -52,7 +34,7 @@ export default function ArtisanSpotlight() {
                   <div className="relative w-32 h-32 rounded-full overflow-hidden flex-shrink-0">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20" />
                     <Image
-                      src={artisan.image}
+                      src={artisan.avatar}
                       alt={artisan.name}
                       fill
                       className="object-cover"
@@ -66,11 +48,14 @@ export default function ArtisanSpotlight() {
                         <h3 className="text-2xl font-bold font-playfair">
                           {artisan.name}
                         </h3>
-                        <p className="text-lg text-primary">{artisan.craft}</p>
+                        <p className="text-lg text-primary">{artisan.specialty}</p>
                       </div>
                       <div className="flex items-center mt-2 sm:mt-0">
                         <Star className="h-5 w-5 text-yellow-400 fill-yellow-400 mr-1" />
                         <span className="font-semibold">{artisan.rating}</span>
+                        <span className="text-sm text-muted-foreground ml-1">
+                          ({artisan.reviewCount})
+                        </span>
                       </div>
                     </div>
 
@@ -82,18 +67,30 @@ export default function ArtisanSpotlight() {
                       </div>
                       <div className="flex items-center text-muted-foreground">
                         <Users className="h-4 w-4 mr-2" />
-                        {artisan.products} products
+                        {artisan.productCount} products
                       </div>
                     </div>
 
                     {/* Story */}
-                    <p className="text-muted-foreground mb-6">
+                    <p className="text-muted-foreground mb-6 line-clamp-2">
                       {artisan.story}
                     </p>
 
-                    {/* Actions - FIXED with template strings */}
+                    {/* Badges */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {artisan.badges.slice(0, 3).map((badge) => (
+                        <span
+                          key={badge}
+                          className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                        >
+                          {badge}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Actions - Properly linking to artisan profile */}
                     <div className="flex gap-4">
-                      <Link href={`/artisans/${artisan.id}`}>
+                      <Link href={`/artisans/${artisan.slug}`}>
                         <Button variant="outline">View Profile</Button>
                       </Link>
                       <Link href={`/marketplace?artisan=${artisan.id}`}>

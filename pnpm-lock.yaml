@@ -74,6 +74,9 @@ importers:
       framer-motion:
         specifier: ^12.29.2
         version: 12.34.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      holy-loader:
+        specifier: 2.3.14
+        version: 2.3.14(react@18.3.1)
       js-cookie:
         specifier: 3.0.5
         version: 3.0.5
@@ -1980,6 +1983,11 @@ packages:
 
   hermes-parser@0.25.1:
     resolution: {integrity: sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==}
+
+  holy-loader@2.3.14:
+    resolution: {integrity: sha512-V7z6jXKy/CZfZY6EAVxMFGbLfE7/TLhYWgpMhODvZPpAL2JTkfjmZhYd0TiZIdZiychtCL5tA5sRN0MUwjRNjA==}
+    peerDependencies:
+      react: '>= 16.0.0'
 
   https-proxy-agent@7.0.6:
     resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
@@ -5055,6 +5063,10 @@ snapshots:
   hermes-parser@0.25.1:
     dependencies:
       hermes-estree: 0.25.1
+
+  holy-loader@2.3.14(react@18.3.1):
+    dependencies:
+      react: 18.3.1
 
   https-proxy-agent@7.0.6:
     dependencies:

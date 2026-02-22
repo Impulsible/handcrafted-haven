@@ -177,7 +177,7 @@ export const artisans: Artisan[] = [
     id: 105,
     name: "Isabella Santos",
     slug: "isabella-santos",
-    avatar: "/images/artisans/isabella.jpg",
+    avatar: "/images/artisans/isabella.avif",
     coverImage: "/images/artisans/covers/isabella-cover.jpg",
     location: "Miami, Florida",
     country: "USA",

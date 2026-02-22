@@ -143,7 +143,7 @@ export const products: Product[] = [
     name: "Silver Filigree Earrings",
     description: "Handcrafted sterling silver earrings with intricate filigree work. Lightweight and elegant, these earrings feature traditional patterns passed down through generations.",
     price: 89.00,
-    image: "/images/products/jewelry/earrings-1.avif",
+    image: "/images/products/jewelry/silver.avif",
     category: "Jewelry",
     categorySlug: "jewelry",
     artisan: "Anita Desai",

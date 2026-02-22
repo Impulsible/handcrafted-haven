@@ -3,105 +3,57 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   MapPin, 
   Star, 
   Globe, 
   Instagram, 
-  Twitter,
   ShoppingBag,
   Award,
   ArrowRight,
   Search,
-  Filter
+  Filter,
+  Loader2
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { products } from "@/data/products";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
-// Define Product type from your data
-interface Product {
+// Define Artisan type from Supabase
+interface Artisan {
   id: number;
   name: string;
-  price: number;
-  description: string;
-  image: string;
-  category: string;
-  inStock: boolean;
-  rating: number;
-  reviews: number;
-  artisan: string;
-  artisanId?: string;
-  artisanLocation?: string;
-  artisanAvatar?: string;
-  createdAt?: string;
-}
-
-// Define Artisan type interface
-interface Artisan {
-  id: string;
-  name: string;
-  location: string;
+  slug: string;
   avatar: string;
+  cover_image: string;
+  location: string;
   specialty: string;
-  products: Product[]; // Replaced 'any[]' with Product[]
-  rating: number;
-  totalReviews: number;
-  joinDate: string;
+  story: string;
   bio: string;
-  social: {
-    instagram: string;
-    twitter: string;
-    website: string;
-  };
+  rating: number;
+  review_count: number;
+  product_count: number;
+  badges: string[] | null;
+  is_verified: boolean;
+  social_links: {
+    instagram?: string;
+    website?: string;
+  } | null;
+  created_at: string;
 }
-
-// Generate unique artisans from products
-const getUniqueArtisans = (): Artisan[] => {
-  const artisanMap = new Map<string, Artisan>();
-  
-  products.forEach((product: Product) => {
-    if (!artisanMap.has(product.artisan)) {
-      artisanMap.set(product.artisan, {
-        id: product.artisanId || `artisan-${product.id}`,
-        name: product.artisan,
-        location: product.artisanLocation || "Location unavailable",
-        avatar: product.artisanAvatar || `https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop`,
-        specialty: product.category,
-        products: [product],
-        rating: product.rating,
-        totalReviews: product.reviews,
-        joinDate: product.createdAt || new Date().toISOString(),
-        bio: `${product.artisan} is a master ${product.category.toLowerCase()} artisan with years of experience creating unique handmade pieces.`,
-        social: {
-          instagram: "#",
-          twitter: "#",
-          website: "#"
-        }
-      });
-    } else {
-      const existing = artisanMap.get(product.artisan)!;
-      existing.products.push(product);
-      existing.rating = (existing.rating + product.rating) / 2;
-      existing.totalReviews += product.reviews;
-    }
-  });
-  
-  return Array.from(artisanMap.values());
-};
 
 // Artisan Card Component
 const ArtisanCard = ({ artisan }: { artisan: Artisan }) => {
-  const productCount = artisan.products.length;
-  
   return (
     <Link 
-      href={`/artisans/${encodeURIComponent(artisan.name.toLowerCase().replace(/\s+/g, '-'))}`}
+      href={`/artisans/${artisan.slug}`}
       className="group bg-card border border-primary/10 rounded-2xl overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1"
     >
       <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20">
         <Image
-          src={artisan.avatar}
+          src={artisan.avatar || '/images/artisans/default-avatar.jpg'}
           alt={artisan.name}
           fill
           className="object-cover"
@@ -112,8 +64,15 @@ const ArtisanCard = ({ artisan }: { artisan: Artisan }) => {
         {/* Rating Badge */}
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium flex items-center gap-1">
           <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-          <span>{artisan.rating.toFixed(1)}</span>
+          <span>{artisan.rating?.toFixed(1) || '0.0'}</span>
         </div>
+
+        {/* Verified Badge */}
+        {artisan.is_verified && (
+          <div className="absolute top-3 left-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+            Verified
+          </div>
+        )}
       </div>
       
       <div className="p-5">
@@ -127,7 +86,7 @@ const ArtisanCard = ({ artisan }: { artisan: Artisan }) => {
         </div>
         
         <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-          {artisan.bio}
+          {artisan.bio || artisan.story}
         </p>
         
         <div className="flex items-center justify-between">
@@ -135,7 +94,7 @@ const ArtisanCard = ({ artisan }: { artisan: Artisan }) => {
             {artisan.specialty}
           </span>
           <span className="text-xs text-muted-foreground">
-            {productCount} {productCount === 1 ? 'item' : 'items'}
+            {artisan.product_count || 0} {artisan.product_count === 1 ? 'item' : 'items'}
           </span>
         </div>
       </div>
@@ -165,12 +124,12 @@ const FeaturedArtisan = ({ artisan }: { artisan: Artisan }) => {
             </div>
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <span className="text-sm">{artisan.rating.toFixed(1)} ({artisan.totalReviews} reviews)</span>
+              <span className="text-sm">{artisan.rating?.toFixed(1) || '0.0'} ({artisan.review_count || 0} reviews)</span>
             </div>
           </div>
           
           <p className="text-muted-foreground mb-6">
-            {artisan.bio}
+            {artisan.bio || artisan.story}
           </p>
           
           <div className="flex flex-wrap gap-3 mb-6">
@@ -178,33 +137,28 @@ const FeaturedArtisan = ({ artisan }: { artisan: Artisan }) => {
               {artisan.specialty} Specialist
             </span>
             <span className="text-sm bg-card px-3 py-1 rounded-full border border-primary/10">
-              {artisan.products.length} Products
+              {artisan.product_count || 0} Products
             </span>
             <span className="text-sm bg-card px-3 py-1 rounded-full border border-primary/10">
-              Since {new Date(artisan.joinDate).getFullYear()}
+              Since {new Date(artisan.created_at).getFullYear()}
             </span>
           </div>
           
           <div className="flex gap-3">
-            <Link href={`/artisans/${encodeURIComponent(artisan.name.toLowerCase().replace(/\s+/g, '-'))}`}>
+            <Link href={`/artisans/${artisan.slug}`}>
               <Button className="bg-gradient-to-r from-primary to-secondary text-white">
                 View Profile
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <div className="flex gap-2">
-              {artisan.social.instagram && (
-                <a href={artisan.social.instagram} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-card border border-primary/10 hover:bg-primary/5">
+              {artisan.social_links?.instagram && (
+                <a href={artisan.social_links.instagram} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-card border border-primary/10 hover:bg-primary/5">
                   <Instagram className="h-5 w-5" />
                 </a>
               )}
-              {artisan.social.twitter && (
-                <a href={artisan.social.twitter} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-card border border-primary/10 hover:bg-primary/5">
-                  <Twitter className="h-5 w-5" />
-                </a>
-              )}
-              {artisan.social.website && (
-                <a href={artisan.social.website} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-card border border-primary/10 hover:bg-primary/5">
+              {artisan.social_links?.website && (
+                <a href={artisan.social_links.website} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-card border border-primary/10 hover:bg-primary/5">
                   <Globe className="h-5 w-5" />
                 </a>
               )}
@@ -214,7 +168,7 @@ const FeaturedArtisan = ({ artisan }: { artisan: Artisan }) => {
         
         <div className="relative h-[400px] rounded-2xl overflow-hidden">
           <Image
-            src={artisan.avatar}
+            src={artisan.avatar || '/images/artisans/default-avatar.jpg'}
             alt={artisan.name}
             fill
             className="object-cover"
@@ -227,36 +181,50 @@ const FeaturedArtisan = ({ artisan }: { artisan: Artisan }) => {
 };
 
 export default function ArtisansPage() {
+  const router = useRouter();
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [featuredArtisan, setFeaturedArtisan] = useState<Artisan | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
-  const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load artisans on mount - using a single state update with a timeout
+  // Fetch artisans from Supabase
   useEffect(() => {
-    const allArtisans = getUniqueArtisans();
-    
-    // Use a single state update with a microtask to avoid cascading renders
-    queueMicrotask(() => {
-      setArtisans(allArtisans);
+    fetchArtisans();
+  }, []);
+
+  const fetchArtisans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('artisans')
+        .select('*')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setArtisans(data || []);
       
       // Set a random featured artisan
-      if (allArtisans.length > 0) {
-        const randomIndex = Math.floor(Math.random() * allArtisans.length);
-        setFeaturedArtisan(allArtisans[randomIndex]);
+      if (data && data.length > 0) {
+        const randomIndex = Math.floor(Math.random() * data.length);
+        setFeaturedArtisan(data[randomIndex]);
       }
-      
-      setIsMounted(true);
-    });
-  }, []); // Empty dependency array - runs once on mount
+    } catch (error) {
+      console.error('Error fetching artisans:', error);
+      toast.error('Failed to load artisans');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Get unique specialties for filter - using Array.from to fix Set iteration
+  // Get unique specialties for filter
   const specialties = useMemo(() => {
-    return ["all", ...Array.from(new Set(artisans.map(a => a.specialty)))];
+    const uniqueSpecialties = Array.from(new Set(artisans.map(a => a.specialty)));
+    return ["all", ...uniqueSpecialties];
   }, [artisans]);
 
-  // Use useMemo for filtered artisans instead of useEffect
+  // Filtered artisans
   const filteredArtisans = useMemo(() => {
     let filtered = [...artisans];
     
@@ -265,7 +233,7 @@ export default function ArtisansPage() {
       filtered = filtered.filter(a => 
         a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         a.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.bio.toLowerCase().includes(searchQuery.toLowerCase())
+        (a.bio || a.story || '').toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     
@@ -277,11 +245,12 @@ export default function ArtisansPage() {
     return filtered;
   }, [searchQuery, selectedSpecialty, artisans]);
 
-  if (!isMounted) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl">
-          <div className="h-96 rounded-2xl bg-gradient-to-r from-primary/20 to-secondary/20 animate-pulse" />
+      <div className="min-h-screen bg-gradient-to-b from-background to-background/95 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading artisans...</p>
         </div>
       </div>
     );
@@ -317,77 +286,102 @@ export default function ArtisansPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl">
-        {/* Featured Artisan */}
-        {featuredArtisan && (
-          <div className="mb-16">
-            <FeaturedArtisan artisan={featuredArtisan} />
-          </div>
-        )}
-
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <h2 className="text-2xl font-heading font-bold">
-            All Artisans <span className="text-sm font-normal text-muted-foreground ml-2">({filteredArtisans.length})</span>
-          </h2>
-          
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            {specialties.map((specialty) => (
-              <button
-                key={specialty}
-                onClick={() => setSelectedSpecialty(specialty)}
-                className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
-                  selectedSpecialty === specialty
-                    ? 'bg-gradient-to-r from-primary to-secondary text-white'
-                    : 'bg-card border border-primary/10 hover:bg-primary/5'
-                }`}
-              >
-                {specialty.charAt(0).toUpperCase() + specialty.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Artisans Grid */}
-        {filteredArtisans.length === 0 ? (
-          <div className="text-center py-16 bg-card border border-primary/10 rounded-2xl">
-            <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No artisans found</h3>
-            <p className="text-muted-foreground mb-4">Try adjusting your search or filters</p>
+        {/* Show empty state if no artisans */}
+        {artisans.length === 0 ? (
+          <div className="text-center py-20 bg-card border border-primary/10 rounded-2xl">
+            <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h2 className="text-2xl font-bold mb-2">No Artisans Yet</h2>
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+              Be the first to join our community of talented craftspeople and share your work with the world.
+            </p>
             <Button 
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedSpecialty("all");
-              }}
-              variant="outline"
+              onClick={() => router.push('/become-artisan')}
+              className="bg-gradient-to-r from-primary to-secondary text-white px-8 py-6 text-lg"
             >
-              Clear Filters
+              Become an Artisan
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredArtisans.map((artisan, index) => (
-              <ArtisanCard key={artisan.id || `artisan-${index}`} artisan={artisan} />
-            ))}
-          </div>
+          <>
+            {/* Featured Artisan */}
+            {featuredArtisan && (
+              <div className="mb-16">
+                <FeaturedArtisan artisan={featuredArtisan} />
+              </div>
+            )}
+
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <h2 className="text-2xl font-heading font-bold">
+                All Artisans <span className="text-sm font-normal text-muted-foreground ml-2">({filteredArtisans.length})</span>
+              </h2>
+              
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                {specialties.map((specialty) => (
+                  <button
+                    key={specialty}
+                    onClick={() => setSelectedSpecialty(specialty)}
+                    className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
+                      selectedSpecialty === specialty
+                        ? 'bg-gradient-to-r from-primary to-secondary text-white'
+                        : 'bg-card border border-primary/10 hover:bg-primary/5'
+                    }`}
+                  >
+                    {specialty === 'all' ? 'All' : specialty}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Artisans Grid */}
+            {filteredArtisans.length === 0 ? (
+              <div className="text-center py-16 bg-card border border-primary/10 rounded-2xl">
+                <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No artisans found</h3>
+                <p className="text-muted-foreground mb-4">Try adjusting your search or filters</p>
+                <Button 
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedSpecialty("all");
+                  }}
+                  variant="outline"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredArtisans.map((artisan) => (
+                  <ArtisanCard key={artisan.id} artisan={artisan} />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Call to Action */}
-      <section className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border-t border-primary/20 mt-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 max-w-7xl text-center">
-          <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">
-            Are You an <span className="text-gradient">Artisan?</span>
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join our community of talented craftspeople and share your work with the world.
-          </p>
-          <Button className="bg-gradient-to-r from-primary to-secondary text-white px-8 py-6 text-lg">
-            Apply to Sell
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
-      </section>
+      {/* Call to Action - Only show if there are artisans */}
+      {artisans.length > 0 && (
+        <section className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border-t border-primary/20 mt-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 max-w-7xl text-center">
+            <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">
+              Are You an <span className="text-gradient">Artisan?</span>
+            </h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join our community of talented craftspeople and share your work with the world.
+            </p>
+            <Button 
+              onClick={() => router.push('/become-artisan')}
+              className="bg-gradient-to-r from-primary to-secondary text-white px-8 py-6 text-lg"
+            >
+              Apply to Sell
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
